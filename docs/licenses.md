@@ -8,6 +8,7 @@
 |---|---|---|---|
 | react | 19.3.1 | MIT | dependencies |
 | react-dom | 19.3.1 | MIT | dependencies |
+| @playwright/test | 1.64.1 | Apache-2.0 | devDependencies |
 | @tailwindcss/vite | 4.3.3 | MIT | devDependencies |
 | @testing-library/jest-dom | 7.0.1 | MIT | devDependencies |
 | @testing-library/react | 16.3.3 | MIT | devDependencies |
@@ -18,6 +19,7 @@
 | @types/react-dom | 19.3.0 | MIT | devDependencies |
 | @vitejs/plugin-react | 6.1.2 | MIT | devDependencies |
 | jsdom | 30.1.3 | MIT | devDependencies |
+| pngjs | 7.0.0 | MIT | devDependencies |
 | tailwindcss | 4.3.3 | MIT | devDependencies |
 | typescript | 7.0.2 | Apache-2.0 | devDependencies |
 | vite | 8.3.4 | MIT | devDependencies |
@@ -25,6 +27,21 @@
 | vite-plugin-pwa | 2.0.0 | MIT | devDependencies |
 
 התלויות העיקריות של vite-plugin-pwa הן workbox-build ו-workbox-window, גרסה 7.4.1, MIT.
+
+@playwright/test מביאה את playwright ואת playwright-core, גרסה 1.64.1, Apache-2.0. pngjs (בלי תלויות) מייצרת את תמונות הבדיקה הסינתטיות.
+
+## דפדפן לבדיקות קצה-לקצה
+
+`npx playwright install chromium` מוריד מ-cdn.playwright.dev ל-`%LOCALAPPDATA%\ms-playwright`, מחוץ לריפו. שום דבר מזה לא נשלח לדפדפן של המשתמש. נבדק בקבצים שבהורדה, 2026-10-17.
+
+| רכיב | גרסה | רישיון | שימוש |
+|---|---|---|---|
+| Chrome Headless Shell | 156.0.8078.4 (playwright v1248) | `LICENSE.headless_shell`: רישיון Chromium (BSD-3-Clause) ואחריו רישיונות של רכיבי צד שלישי, חלקם LGPL. קובץ `ABOUT` מפנה לתנאי השירות של Chrome | מריץ את הבדיקות (headless) |
+| Chrome for Testing | 156.0.8078.4 (playwright v1248) | קובץ `ABOUT`: "Copyright 2026 Google LLC. All rights reserved", תנאי השירות של Chrome. אין קובץ רישיון בהורדה | רק להרצה עם חלון (`--headed`, `--ui`) |
+| FFmpeg | playwright v1013 | LGPL-2.1 (`COPYING.LGPLv2.1` בהורדה) | הקלטת וידאו, שהבדיקות לא משתמשות בה |
+| winldd | playwright v1007 | לא מאומת | כלי Windows של Playwright שבודק את קבצי ה-DLL של הדפדפן |
+
+Chrome for Testing ו-FFmpeg מחוץ לרשימה המותרת. הבדיקות צריכות רק את Headless Shell: `npx playwright install --only-shell chromium` מוריד אותו, עם FFmpeg ו-winldd, בלי Chrome for Testing. ההחלטה של בעל הפרויקט.
 
 ## תלויות עקיפות מחוץ לרשימה המותרת
 
