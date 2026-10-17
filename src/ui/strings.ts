@@ -15,3 +15,7 @@ export const SCAN_TEXT = {
   noCamera: 'אין גישה למצלמה. אפשר לאשר גישה בהגדרות הדפדפן, או להעלות תמונה של תפוח האדמה.',
   unsupported: 'הקובץ לא נתמך',
 };
+export const CULTIVAR_WARNING = 'על קליפה אדומה או חומה מחוספסת הירוק עלול להיות מוסתר. טעם מר או נבטים הם סימני אזהרה גם בלי ירוק.';
+export const NOTHING_ANALYZED = 'לא נסרק דבר. נסה שוב באור טוב יותר, ומלא את המסגרת בתפוח האדמה.';
+// percent follows a separate "4%" element; image is the start of the picture's screen-reader label
+export const RESULT_TEXT = { again: 'סרוק עוד אחד', percent: 'מהשטח בתמונה ירוק', image: 'התמונה שנסרקה' };
