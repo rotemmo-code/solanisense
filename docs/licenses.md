@@ -11,6 +11,7 @@
 | @tailwindcss/vite | 4.3.3 | MIT | devDependencies |
 | @testing-library/jest-dom | 7.0.1 | MIT | devDependencies |
 | @testing-library/react | 16.3.3 | MIT | devDependencies |
+| @testing-library/user-event | 14.6.7 | MIT | devDependencies |
 | @testing-library/dom | 10.4.2 | MIT | peer של @testing-library/react, הותקן אוטומטית |
 | @types/node | 24.19.2 | MIT | devDependencies |
 | @types/react | 19.3.0 | MIT | devDependencies |
