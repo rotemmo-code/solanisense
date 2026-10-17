@@ -19,3 +19,20 @@ export const CULTIVAR_WARNING = 'על קליפה אדומה או חומה מחו
 export const NOTHING_ANALYZED = 'לא נסרק דבר. נסה שוב באור טוב יותר, ומלא את המסגרת בתפוח האדמה.';
 // percent follows a separate "4%" element; image is the start of the picture's screen-reader label
 export const RESULT_TEXT = { again: 'סרוק עוד אחד', percent: 'מהשטח בתמונה ירוק', image: 'התמונה שנסרקה' };
+export const INFO_TEXT = {
+  title: 'מידע',
+  source: 'מקור:',
+  sources: 'מקורות:',
+  howTo: 'איך מנקים, שלב אחר שלב',
+  settings: 'הגדרות',
+  speech: 'הקראה קולית',
+  haptics: 'רטט',
+  noHebrewVoice: 'אין קול עברי במכשיר, ולכן ההקראה עלולה לשתוק או להישמע בשפה אחרת. אפשר להוסיף קול עברי בהגדרות ההקראה של הטלפון.',
+  disclaimer: 'הצהרת אחריות',
+};
+export const HOWTO_TEXT = {
+  steps: ['שלב 1: קולפן לירוק השטחי', 'שלב 2: סכין בזווית סביב העין', 'שלב 3: אם צריך לקלף יותר מכמה מילימטרים, או שהירוק הגיע פנימה: לזרוק'],
+  prev: 'הקודם',
+  next: 'הבא',
+  read: 'הקרא',
+};

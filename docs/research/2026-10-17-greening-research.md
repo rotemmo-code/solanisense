@@ -34,9 +34,9 @@
 
 | רשות | הנחיה |
 |---|---|
-| BfR, גרמניה | לחתוך בנדיבות חלקים ירוקים ו"עיניים". תפוח אדמה ירוק או מונבט מאוד: לא מתאים לאכילה. ילדים קטנים: רק קלוף. טעם מר: לא לאכול. לא להשתמש שוב במי בישול. |
-| CFS, הונג קונג | הרעלן יושב בשכבה של כ-1.5 מ"מ מתחת לקליפה, 30 עד 80 אחוז ממנו בקליפה. "לחתוך כל חלק פגוע, רקוב, ירוק או מונבט לפני הבישול. במקרים חמורים לזרוק את כל תפוח האדמה." בישול לא מפחית. מר או צורב: לא לאכול. |
-| Oregon State, ארה"ב | קילוף מפחית 25 עד 75 אחוז. ריכוז גבוה סביב עיניים, נבטים ופצעים. טיגון ב-210 מעלות מפחית כ-40 אחוז, בישול כמעט לא. |
+| BfR, גרמניה | לחתוך בנדיבות חלקים ירוקים ו"עיניים". תפוח אדמה ירוק או מונבט מאוד: לא מתאים לאכילה. ילדים קטנים: רק קלוף. טעם מר: לא לאכול. לא להשתמש שוב במי בישול, כי "Some of the alkaloids pass over to the water during boiling" (אומת 2026-10-17). |
+| CFS, הונג קונג | הרעלן יושב בשכבה של כ-1.5 מ"מ מתחת לקליפה, 30 עד 80 אחוז ממנו בקליפה. "לחתוך כל חלק פגוע, רקוב, ירוק או מונבט לפני הבישול. במקרים חמורים לזרוק את כל תפוח האדמה." בישול לא מפחית. מר או צורב: לא לאכול. לאחסן "במקום קריר, יבש וחשוך" ("in a cool, dry, dark place", אומת 2026-10-17). |
+| Oregon State, ארה"ב | קילוף מפחית 25 עד 75 אחוז. ריכוז גבוה סביב עיניים, נבטים ופצעים. טיגון ב-210 מעלות מפחית כ-40 אחוז, בישול כמעט לא. גליקואלקלואידים "toxic to humans if consumed in high concentrations", ותפוחי אדמה "accumulate glycoalkaloids when exposed to light" (אומת 2026-10-17). |
 | ספרות (IntechOpen, ScienceDirect) | הרעלן מרוכז עד 1 מ"מ, 1.5 מ"מ או לכל היותר 3 מ"מ מתחת לקליפה, לפי המקור. הסרת שכבה של 1.5 מ"מ מסירה 50 עד 95 אחוז. |
 | משרד הבריאות, ישראל | לא נמצא מסמך רשמי ב-gov.il. כתבות בעיתונות מצטטות את המשרד על תסמינים בלבד. |
 | FDA, ארה"ב | אין תקנה פדרלית לסולנין (EPA issue paper). ההנחיה האמריקאית היא לא-רשמית של USDA: עד 200 מ"ג/ק"ג. Potatoes USA מייחס ל-FDA "20 עד 25 מ"ג/100 גרם", לא אומת מול אתר FDA. חוקרים רבים סבורים ש-200 גבוה מדי. |
@@ -93,7 +93,7 @@
 - Physiological and Molecular Mechanisms of Light-Induced Greening in Potatoes (Foods, 2025): https://pmc.ncbi.nlm.nih.gov/articles/PMC12111433/
 - Light-Quality-Dependent Greening and SGA Accumulation (2025): https://pmc.ncbi.nlm.nih.gov/articles/PMC12523430/
 - Changes in chlorophyll, solanine and phytohormones during greening (Postharvest Biology and Technology, 2025): https://www.sciencedirect.com/science/article/abs/pii/S0925521424005362
-- Oregon State Extension EM 9407, Glycoalkaloids in Potato Tubers (2023): https://extension.oregonstate.edu/catalog/pub/em9407
+- Oregon State Extension EM 9407, Glycoalkaloids in Potato Tubers (2023): https://extension.oregonstate.edu/catalog/pub/em-9407-glycoalkaloids-potato-tubers (תוקן 2026-10-17: הכתובת הקודמת, /catalog/pub/em9407, מובילה למסמך אחר על כרוביים)
 - BfR FAQ on solanine in potatoes: https://www.bfr.bund.de/en/service/frequently-asked-questions/topic/frequently-asked-questions-about-solanine-glycoalkaloids-in-potatoes/
 - Finnish Food Authority, glycoalkaloids: https://www.ruokavirasto.fi/en/foodstuffs/food-sector/contaminants-and-residues/natural-toxic-substances-in-foodstuffs/glycoalkaloids-in-potatoes-and-raw-tomatoes/
 - Quantifying risk factors of greening in retail stores (2020): https://pmc.ncbi.nlm.nih.gov/articles/PMC7500657/
