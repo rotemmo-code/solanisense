@@ -31,11 +31,18 @@ test('פריים לא ריבועי: האליפסה נמתחת לרוחב וה-ma
   expect(r.mask.reduce((s, v) => s + v, 0)).toBe(24); expect(r.mask[15 * 64 + 52]).toBe(1);
 });
 test.each<[string, RGB]>([
-  ['אדמדמה (רק a* מעל TINT_A)', [200, 130, 140]], // L* 61.8, a* 28.3, b* 5.9
-  ['כחולה (b* שלילי, נתפס בערך המוחלט)', [100, 140, 230]], // L* 59.1, a* 12.4, b* -49.8
+  ['אדמדמה (רק a* מעל TINT_A)', [220, 40, 100]], // L* 49.1, a* 69.4, b* 11.9
+  ['כחולה (b* שלילי, נתפס בערך המוחלט)', [60, 120, 255]], // L* 53.6, a* 27.1, b* -72.7
 ])('תאורה %s: tinted', (_, rgb) => { expect(a.analyze(makeFrame(16, 16, () => rgb)).lighting).toBe('tinted'); });
 // Fix round 1: GREEN's b* is 41.06, so with the b* tint clause always on, a mostly green tuber read as tinted light and froze the verdict
 test('פקעת ירוקה כולה או ברובה: התאורה ok ולא tinted', () => {
   const full = a.analyze(makeFrame(64, 64, () => GREEN)); expect(full.lighting).toBe('ok'); expect(full.greenRatio).toBeGreaterThan(0.10);
   expect(a.analyze(makeFrame(64, 64, (x, y) => ((x + y) % 5 < 3 ? GREEN : BROWN))).lighting).toBe('ok'); // 60.0% of the frame, 59.8% of the ROI
 });
+// Fix round 2: normal skins must not read as tinted light, and the lighting checks keep their order and the A_ABS boundary
+test('קליפה צהובה: התאורה ok', () => { expect(a.analyze(makeFrame(64, 64, () => [210, 180, 110])).lighting).toBe('ok'); }); // b* 39.55
+test('0x0: התאורה dark וה-mask ריק', () => { const r = a.analyze({ width: 0, height: 0, data: new Uint8ClampedArray(0) }); expect(r.lighting).toBe('dark'); expect(r.mask.length).toBe(0); });
+test('כהה וגם צבעוני: dark נבדק קודם', () => { expect(a.analyze(makeFrame(16, 16, () => [0, 0, 150])).lighting).toBe('dark'); }); // L* 16.5, a* 53.3, b* -72.6: trips both checks
+test('חציון a* מעט מעל A_ABS: הכלל היחסי עדיין חל', () => { expect(a.analyze(spot([145, 156, 145], [150, 156, 150])).greenRatio).toBe(0); }); // median a* -3.32; spot a* -6.08 is below A_ABS but within A_REL
+test('חציון a* מעט מעל A_ABS: בדיקת b* עדיין חלה (אור זהוב)', () => { expect(a.analyze(makeFrame(16, 16, () => [255, 218, 0])).lighting).toBe('tinted'); }); // a* -3.44, b* 87.66
+test('ירוק-צהבהב רווי (b* מעל TINT_B): עדיין ok כי החציון ירוק', () => { expect(a.analyze(makeFrame(64, 64, () => [160, 200, 50])).lighting).toBe('ok'); }); // a* -33.37, b* 65.70: keeps the median-green guard pinned now that GREEN's b* 41 is under TINT_B
