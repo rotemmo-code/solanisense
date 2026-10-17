@@ -36,3 +36,4 @@ export const HOWTO_TEXT = {
   next: 'הבא',
   read: 'הקרא',
 };
+export const NAV_TEXT = { scan: 'סריקה', info: 'מידע' };
