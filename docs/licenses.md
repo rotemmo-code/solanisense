@@ -47,7 +47,7 @@ Chrome for Testing ו-FFmpeg מחוץ לרשימה המותרת. הבדיקות 
 
 ## תלויות עקיפות מחוץ לרשימה המותרת
 
-נסרק מ-`package-lock.json` ב-2026-10-17. כולן כלי פיתוח ובדיקה בלבד. הקוד שנשלח לדפדפן מכיל רק react, react-dom, scheduler ו-workbox (MIT): הדף טוען את workbox-window, וה-service worker בנוי מ-workbox-core, workbox-precaching ו-workbox-routing.
+נסרק מ-`package-lock.json` ב-2026-10-17. כולן כלי פיתוח ובדיקה בלבד. הקוד שנשלח לדפדפן מכיל רק react, react-dom, scheduler ו-workbox (MIT): הדף טוען את workbox-window, וה-service worker בנוי מ-workbox-core, workbox-precaching, workbox-routing ו-workbox-strategies, כולן 7.4.1 ו-MIT.
 
 | חבילה | גרסה | רישיון | מגיעה דרך |
 |---|---|---|---|

@@ -1,15 +1,15 @@
 # סקירת אבטחה ופרטיות: SolaniSense, שלב 1
 
 - תאריך: 2026-10-17.
-- מה נסקר: `main` ב-commit `9d7ace514b368b3802ec6836f074ed7371dea74c`, ועליו מדיניות ה-CSP ב-`index.html` שנוספה בקומיט של הסקירה הזו. הקוד זהה ל-`b09770b`: הקומיט `9d7ace5` הוסיף רק את `docs/decisions.md`.
+- מה נסקר: `main` ב-commit `9d7ace514b368b3802ec6836f074ed7371dea74c`, ועליו מדיניות ה-CSP ב-`index.html`, שנוספה בקומיט של הסקירה הזו (`bc22442`) ותוקנה בסבב התיקון הראשון. הקוד זהה ל-`b09770b`: הקומיט `9d7ace5` הוסיף רק את `docs/decisions.md`.
 - סביבה: Windows 11, Node 24.19.0, npm 11.17.0, Vite 8.3.4, vite-plugin-pwa 2.0.0, ודפדפן Chrome Headless Shell של Playwright 1.64.1.
-- היקף: הקוד ב-`src`, `index.html`, הבנייה ב-`dist`, התלויות והתמונות שבריפו. השינוי היחיד בקוד הוא תג ה-CSP. ממצאים שדורשים שינוי קוד רשומים בסעיף 5, ולא בוצעו.
+- היקף: הקוד ב-`src`, `index.html`, הבנייה ב-`dist`, התלויות והתמונות שבריפו. השינוי היחיד בקוד הוא תג ה-CSP. ממצאים שדורשים שינוי קוד רשומים בסעיף 5, ולא בוצעו. שני ממצאים שלא דרשו שינוי ב-`src` בוצעו בסבב התיקון הראשון (סעיף 5, פריטים 1 ו-5).
 
 ## סיכום
 
 | בדיקה | תוצאה |
 |---|---|
-| CSP ב-`index.html` | נוסף. הבנייה לייצור ושרת הפיתוח עובדים תחתיו: 6 מתוך 6 בדיקות קצה-לקצה בכל אחד, אפס הפרות. בכל טעינה Chrome מדפיס שגיאה אחת: `frame-ancestors` לא נאכף בתג meta (סעיף 1.3) |
+| CSP ב-`index.html` | נוסף. הבנייה לייצור ושרת הפיתוח עובדים תחתיו: 6 מתוך 6 בדיקות קצה-לקצה בכל אחד, אפס הפרות, ובבנייה לייצור אפס שגיאות CSP בקונסול. `frame-ancestors` לא בתג: הוא חייב להגיע ככותרת HTTP מהאירוח (סעיף 1.3) |
 | `npm audit --omit=dev` | 0 פגיעויות |
 | `npm audit` | 0 פגיעויות |
 | קריאות רשת ב-`src` | אין |
@@ -20,7 +20,7 @@
 | קבצים שמועלים | מפוענחים רק ב-`createImageBitmap` |
 | ה-precache של ה-service worker | 5 קבצים, כולם מהבנייה של האפליקציה |
 | סקריפטים של צד שלישי | אין סקריפט שנטען מבחוץ. בבנייה: react, react-dom, scheduler ו-workbox, כולם MIT |
-| רישיונות | כל 20 התלויות ב-`package.json` רשומות ב-`docs/licenses.md`. חסרה שם workbox-strategies ברשימת הקוד שנשלח לדפדפן (סעיף 5) |
+| רישיונות | כל 20 התלויות ב-`package.json` רשומות ב-`docs/licenses.md`. workbox-strategies, שהייתה חסרה ברשימת הקוד שנשלח לדפדפן, נוספה בסבב התיקון (סעיף 3.9) |
 | מטא-דאטה בתמונות שבריפו | אין: 19 תמונות, בלי EXIF ובלי מיקום |
 | סודות בריפו | אין |
 
@@ -31,7 +31,7 @@
 ב-`index.html`, מיד אחרי `<meta charset>` ולפני כל משאב:
 
 ```
-default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
+default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'
 ```
 
 | הנחיה | למה |
@@ -43,30 +43,30 @@ default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://
 | `img-src` עם `blob:` ו-`data:`, `media-src` עם `blob:` | האפליקציה לא משתמשת בהם היום: המצלמה מחוברת לווידאו דרך `srcObject`, לא דרך כתובת. נשארו לפי ההחלטה |
 | `worker-src 'self'`, `manifest-src 'self'` | ה-service worker (`/sw.js`) וה-manifest מאותו מקור |
 | `object-src 'none'`, `base-uri 'self'`, `form-action 'none'` | אין plugins, אין `<base>` ואין טפסים באפליקציה |
-| `frame-ancestors 'none'` | לא נאכף בתג meta. סעיף 1.3 |
+| `frame-ancestors` | לא בתג: בתג meta הדפדפן מתעלם ממנו. חייב להגיע ככותרת HTTP מהאירוח. סעיף 1.3 |
 
 ### 1.2 אימות
 
 1. `npm run build`, ואז קריאת `dist/index.html`: תג ה-CSP במקומו. הדף טוען רק את `/assets/index-<hash>.js` (מודול), את `/assets/index-<hash>.css` ואת `/manifest.webmanifest`, כולם מאותו מקור. אין סקריפט מוטמע.
 2. הבנייה לייצור: `npx vite preview --port 5173 --strictPort` ברקע, ואז `npm run test:e2e`. ב-`playwright.config.ts` מוגדר `reuseExistingServer: true`, ולכן הבדיקות רצו מול הבנייה. תוצאה: `6 passed`.
-3. בדיקה חד-פעמית ב-Playwright מול הבנייה (סקריפט מקומי, לא נשמר בריפו). היא טוענת את הדף, מעלה את `e2e/fixtures/green-spot.png`, עוברת למסך המידע, טוענת מחדש, וטוענת שוב בלי רשת. תוצאות:
+3. בדיקה חד-פעמית ב-Playwright מול הבנייה (סקריפט מקומי, לא נשמר בריפו). היא טוענת את הדף, מעלה את `e2e/fixtures/green-spot.png`, עוברת למסך המידע, טוענת מחדש, וטוענת שוב בלי רשת. התוצאות מההרצה החוזרת בסבב התיקון, עם המדיניות הסופית:
    - תוכן תג ה-CSP בדף זהה בדיוק למחרוזת למעלה.
    - ה-service worker נרשם: `http://localhost:5173/sw.js`.
    - ההעלאה מציגה "הירקרקות מקומית", ומסך המידע נטען.
    - בלי רשת (`context.setOffline(true)` וטעינה מחדש) האפליקציה נטענת מה-service worker, ותג ה-CSP בתוכה.
    - אפס אירועי `securitypolicyviolation`, אפס שגיאות JavaScript.
    - 19 בקשות רשת, כולן ל-`http://localhost:5173`.
-   - בקונסול רק `The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.`, פעם אחת בכל טעינה, ברמת error.
+   - 0 violations, 0 CSP console errors: הקונסול ריק לגמרי בזרימה הרגילה. לפני הסרת `frame-ancestors` מהתג, Chrome הדפיס בכל טעינה, ברמת error: `The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.`
 4. בדיקות נגד, שמראות שהמדיניות נאכפת. הכתובות בסיומת `.invalid`, שלא קיימת אף פעם, כך ששום בקשה לא יצאה מהמחשב:
    - סקריפט מוטמע שנוסף לדף: לא רץ (הפרה של `script-src-elem`).
    - `eval` ו-`new Function` מקוד הדף: `EvalError` (הפרה של `script-src`). `page.evaluate` של Playwright מתיר `eval` כברירת מחדל (הפרמטר `allowUnsafeEvalBlockedByCSP` של CDP), ולכן הבדיקה מריצה אותם מתוך `setTimeout` של הדף.
    - `fetch` לכתובת חיצונית: נחסם (הפרה של `connect-src`) ונדחה ב-`TypeError`.
    - תמונה וסקריפט מכתובת חיצונית: נחסמו (`img-src`, `script-src-elem`), והבקשות נכשלו בסיבה `csp`.
-5. שרת הפיתוח: `npm run dev` ברקע, ואז `npm run test:e2e`: `6 passed`. אותה בדיקה חד-פעמית מול שרת הפיתוח: אפס הפרות, אפס שגיאות JavaScript, אפס בקשות לכתובות אחרות, ה-WebSocket של Vite התחבר (`[vite] connected.`), ובדיקות הנגד נחסמו כמו בבנייה. עדכון חם בפועל, כלומר שינוי קובץ בזמן ריצה, לא נבדק, כי המשימה לא משנה קבצים ב-`src`.
+5. שרת הפיתוח: `npm run dev` ברקע, ואז `npm run test:e2e`: `6 passed`. אותה בדיקה חד-פעמית מול שרת הפיתוח: אפס הפרות, אפס שגיאות JavaScript, אפס בקשות לכתובות אחרות, ה-WebSocket של Vite התחבר (`[vite] connected.`), ובדיקות הנגד נחסמו כמו בבנייה. הבדיקה הזו רצה לפני הסרת `frame-ancestors` מהתג. ההנחיה לא נאכפה בתג גם אז, ולכן האכיפה זהה. בדיקות הקצה-לקצה רצו שוב מול שרת הפיתוח אחרי ההסרה. עדכון חם בפועל, כלומר שינוי קובץ בזמן ריצה, לא נבדק, כי המשימה לא משנה קבצים ב-`src`.
 
 ### 1.3 מה המדיניות לא עושה
 
-- **`frame-ancestors` לא נאכף בתג meta.** הדפדפן מתעלם ממנו ומדפיס שגיאה בקונסול בכל טעינה. כל אתר יכול להטמיע את האפליקציה ב-`iframe`. הסיכון נמוך: אין חשבונות ואין פעולה רגישה, ומצלמה בתוך `iframe` של אתר אחר דורשת הרשאה מפורשת מהדף המטמיע (`allow="camera"`). הפתרון הוא לשלוח את ה-CSP, כולל `frame-ancestors 'none'`, ככותרת HTTP מהשרת שיארח את האפליקציה. יש שירותי אירוח, למשל GitHub Pages, שלא מאפשרים כותרות משלך.
+- **`frame-ancestors` חייב להגיע ככותרת HTTP מהאירוח, ולכן הוא לא בתג.** בתג meta הדפדפן מתעלם מההנחיה הזו ומדפיס שגיאה בקונסול בכל טעינה, ולכן היא הוסרה מהתג בסבב התיקון. עד שהאירוח ישלח אותה, כל אתר יכול להטמיע את האפליקציה ב-`iframe`. הסיכון נמוך: אין חשבונות ואין פעולה רגישה, ומצלמה בתוך `iframe` של אתר אחר דורשת הרשאה מפורשת מהדף המטמיע (`allow="camera"`). הפתרון הוא לשלוח את ה-CSP, כולל `frame-ancestors 'none'`, ככותרת HTTP מהשרת שיארח את האפליקציה. יש שירותי אירוח, למשל GitHub Pages, שלא מאפשרים כותרות משלך.
 - **שרת הפיתוח עובד תחת המדיניות בזכות סדר ההזרקה.** Vite מזריק את `/@vite/client`, ו-`@vitejs/plugin-react` את הסקריפט המוטמע של React Refresh, בראש ה-`<head>`, לפני תג ה-CSP. מדיניות בתג meta חלה רק על מה שמגיע אחריה, ולכן הסקריפט רץ. אם גרסה עתידית של Vite תזריק אחרי התג, שרת הפיתוח יישבר, ויהיה צריך `'unsafe-inline'` ב-`script-src` בפיתוח בלבד. היום זה לא נדרש.
 - **המדיניות לא חלה על ה-service worker.** ל-service worker יש מדיניות משלו, מכותרות ה-HTTP של `sw.js`, ותג ה-meta בדף לא חל עליו. הוא מביא רק את קבצי ה-precache, מאותו מקור (סעיף 3.7).
 - **המדיניות לא חלה על מנוע ההקראה של הדפדפן.** סעיף 4.
@@ -163,7 +163,7 @@ npm run build && cat dist/sw.js
 
 סקריפט חד-פעמי השווה את `dependencies` ו-`devDependencies` ב-`package.json` לטבלה "תלויות ישירות" ב-`docs/licenses.md`, ואת הגרסה והרישיון בטבלה ל-`node_modules/<pkg>/package.json`.
 
-תוצאה: 20 מתוך 20 רשומות, והגרסה והרישיון תואמים בכולן. השורה הנוספת בטבלה, `@testing-library/dom`, היא peer שהותקן אוטומטית ומתועדת ככזו. פער אחד: המשפט על הקוד שנשלח לדפדפן מונה את workbox-core, workbox-precaching ו-workbox-routing, וחסרה בו workbox-strategies (‏MIT, ‏7.4.1). התיקון המוצע בסעיף 5.
+תוצאה: 20 מתוך 20 רשומות, והגרסה והרישיון תואמים בכולן. השורה הנוספת בטבלה, `@testing-library/dom`, היא peer שהותקן אוטומטית ומתועדת ככזו. פער אחד, שתוקן בסבב התיקון: המשפט על הקוד שנשלח לדפדפן מנה את workbox-core, workbox-precaching ו-workbox-routing, וחסרה בו workbox-strategies (‏MIT, ‏7.4.1). עכשיו היא שם, עם הגרסה והרישיון.
 
 ### 3.10 הריפו הציבורי
 
@@ -183,7 +183,7 @@ git grep -nIiE "api[_-]?key|secret|passw(or)?d|bearer|token\b|private[_-]?key|BE
 
 **סיכונים שנשארו:**
 
-א. **"לא זוהה ירוק" על תפוח אדמה רעיל.** בתאורה חלשה או צבעונית, ועל קליפה אדומה או חומה מחוספסת, הירוק עלול לא להיראות גם כשהרעלן עלה. גם נבטים וטעם מר לא נבדקים. קוד לא יפתור את זה. ההגנה היא בניסוח ובהצהרת האחריות: האפליקציה אומרת "לא זוהה ירוק" ואף פעם לא "בטוח", ההנחיה לרמה הזו היא "סובב לכל הצדדים. טעם מר או נבטים: לא לאכול.", אזהרת הזנים מופיעה בכל מסך תוצאה, והצהרת האחריות במסך המידע. כיול על תמונות אמיתיות עוד לא נעשה (`test-images/README.md`).
+א. **"לא זוהה ירוק" על תפוח אדמה רעיל.** פריים שסווג כחשוך או כצבעוני לא נשפט בכלל, ולכן הסיכון הוא בתאורה שעוברת את שער התאורה ועדיין מטעה, כמו אור חם קיצוני, ועל קליפה אדומה או חומה מחוספסת. בשני המקרים הירוק עלול לא להיראות גם כשהרעלן עלה. גם נבטים וטעם מר לא נבדקים. קוד לא יפתור את זה. ההגנה היא בניסוח ובהצהרת האחריות: האפליקציה אומרת "לא זוהה ירוק" ואף פעם לא "בטוח", ההנחיה לרמה הזו היא "סובב לכל הצדדים. טעם מר או נבטים: לא לאכול.", אזהרת הזנים מופיעה בכל מסך תוצאה, והצהרת האחריות במסך המידע. כיול על תמונות אמיתיות עוד לא נעשה (`test-images/README.md`).
 
 ב. **ה-service worker עלול לטעון את הדף מחדש באמצע סריקה.** עם `registerType: 'autoUpdate'`, ה-service worker החדש מדלג על ההמתנה ותופס שליטה (`skipWaiting` ו-`clientsClaim` ב-`dist/sw.js`), ו-`registerSW` קורא ל-`window.location.reload()` כשהוא מופעל כעדכון. אחרי שמתפרסמת גרסה חדשה, משתמש שפותח את האפליקציה ומתחיל לסרוק מיד עלול לאבד את הסריקה, כולל פסק הדין. אין כאן דליפת מידע. הסיכון כבר מסומן בקוד (`src/main.tsx`, הערת `shortcut:`). הצעה בסעיף 5.
 
@@ -195,7 +195,7 @@ git grep -nIiE "api[_-]?key|secret|passw(or)?d|bearer|token\b|private[_-]?key|BE
 
 ## 5. ממצאים והצעות שלא בוצעו
 
-1. **`frame-ancestors` בתג meta.** לא אוכף כלום, ומדפיס שגיאה בקונסול בכל טעינה. נשאר לפי ההחלטה. ההצעה: למחוק את `; frame-ancestors 'none'` מתג ה-meta, ולשלוח את כל המדיניות, כולל `frame-ancestors 'none'`, ככותרת `Content-Security-Policy` מהאירוח כשייבחר. באותו מקום כדאי גם `X-Content-Type-Options: nosniff` ו-`Permissions-Policy: camera=(self), microphone=()`.
+1. **`frame-ancestors`.** בוצע בסבב התיקון: ההנחיה הוסרה מתג ה-meta, שבו לא אכפה כלום והדפיסה שגיאה בקונסול בכל טעינה. נשאר לשלוח את כל המדיניות, כולל `frame-ancestors 'none'`, ככותרת `Content-Security-Policy` מהאירוח כשייבחר. באותו מקום כדאי גם `X-Content-Type-Options: nosniff` ו-`Permissions-Policy: camera=(self), microphone=()`.
 2. **Google Fonts.** טעינת Rubik מ-Google תגרום לכל משתמש לשלוח בקשה לשרתי Google, עם כתובת ה-IP שלו, בניגוד לכך שהאפליקציה לא שולחת כלום. בנוסף הגופן לא יהיה זמין בלי רשת, כי ה-precache כולל רק את קבצי הבנייה. ההצעה: לארוז את Rubik (רישיון OFL) עם הבנייה, ולמחוק את `https://fonts.googleapis.com` ואת `https://fonts.gstatic.com` מה-CSP.
 3. **עדכון ה-service worker.** ההצעה: ב-`vite.config.ts` להחליף ל-`registerType: 'prompt'`, וב-`src/main.tsx` לשמור את מה ש-`registerSW` מחזיר (`const updateSW = registerSW({ immediate: true, onNeedRefresh })`), כש-`onNeedRefresh` מציג הודעה "יש גרסה חדשה" עם כפתור שקורא ל-`updateSW(true)`. זה דורש רכיב UI, ולכן לא בוצע: ה-UI מוקפא.
 4. **קול מקומי להקראה.** ההצעה, ב-`src/platform/speech.ts`, בתוך `speak()` אחרי `u.lang = 'he-IL'`:
@@ -205,6 +205,6 @@ git grep -nIiE "api[_-]?key|secret|passw(or)?d|bearer|token\b|private[_-]?key|BE
    ```
 
    כך קול עברי מקומי, אם יש כזה, קודם לקול רשת. כשאין קול מקומי ההתנהגות לא משתנה.
-5. **`docs/licenses.md`, שורה 50.** להוסיף את workbox-strategies: "וה-service worker בנוי מ-workbox-core, workbox-precaching, workbox-routing ו-workbox-strategies." הקובץ מחוץ לקבצים של המשימה הזו, ולכן לא תוקן.
+5. **`docs/licenses.md`, שורה 50.** בוצע בסבב התיקון: workbox-strategies נוספה למשפט על ה-service worker, עם הגרסה והרישיון.
 6. **`'unsafe-inline'` ב-`style-src`.** כשה-CSP יישלח ככותרת לבנייה לייצור בלבד, כדאי לבדוק אם אפשר להוריד אותו שם.
 7. **Tailwind סורק גם את המסמכים.** בלי `source()`, התוסף של Tailwind ל-Vite סורק את כל הקבצים בריפו, כולל `README.md` ו-`docs/`, ומילה במסמך שהיא גם שם של מחלקת Tailwind נכנסת ל-CSS שנשלח לדפדפן. בטיוטה של הסקירה הזו מילה אחת כזו הוסיפה כלל CSS אחד, והנוסח שונה. אין לזה השפעה על המראה, אבל שינוי במסמכים משנה את קבצי הבנייה. ההצעה, ב-`src/index.css`: `@import "tailwindcss" source(".");`, שמגביל את הסריקה ל-`src/`. לא נבדק.
