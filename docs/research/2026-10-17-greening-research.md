@@ -1,6 +1,6 @@
 # מחקר: הירקרקות תפוחי אדמה וסולנין
 
-תאריך: 2026-10-17. מטרה: לבסס את אלגוריתם הזיהוי ואת מסרי האפליקציה על ממצאים מפורסמים, לא על ניחוש.
+תאריך: 2026-10-17. כל המקורות נגישו ב-2026-10-17. מטרה: לבסס את אלגוריתם הזיהוי ואת מסרי האפליקציה על ממצאים מפורסמים, לא על ניחוש.
 
 ## 1. מה הקשר בין ירוק לרעלן
 
@@ -39,6 +39,8 @@
 | Oregon State, ארה"ב | קילוף מפחית 25 עד 75 אחוז. ריכוז גבוה סביב עיניים, נבטים ופצעים. טיגון ב-210 מעלות מפחית כ-40 אחוז, בישול כמעט לא. |
 | ספרות (IntechOpen, ScienceDirect) | הרעלן מרוכז עד 1 מ"מ, 1.5 מ"מ או לכל היותר 3 מ"מ מתחת לקליפה, לפי המקור. הסרת שכבה של 1.5 מ"מ מסירה 50 עד 95 אחוז. |
 | משרד הבריאות, ישראל | לא נמצא מסמך רשמי ב-gov.il. כתבות בעיתונות מצטטות את המשרד על תסמינים בלבד. |
+| FDA, ארה"ב | אין תקנה פדרלית לסולנין (EPA issue paper). ההנחיה האמריקאית היא לא-רשמית של USDA: עד 200 מ"ג/ק"ג. Potatoes USA מייחס ל-FDA "20 עד 25 מ"ג/100 גרם", לא אומת מול אתר FDA. חוקרים רבים סבורים ש-200 גבוה מדי. |
+| Health Canada | תקנה מחייבת: מעל 200 מ"ג/ק"ג (20 מ"ג/100 גרם) תפוח האדמה נחשב מזוהם. |
 
 **מה אף רשות לא אומרת:** עומק קילוף במילימטרים, ואחוז שטח ירוק שמעבר לו זורקים. "בנדיבות" ו"במקרים חמורים" הם הניסוחים הרשמיים.
 
@@ -78,6 +80,10 @@
 5. מודול הזיהוי עובד ב-CIELAB (a*) או בגוון HSV, עם מדידה יחסית לחציון הקליפה. הספים בקובץ אחד, מכוילים על מטריצת התאורה.
 
 ## מקורות
+
+- EPA issue paper, natural glycoalkaloids (אין תקנה אמריקאית): https://downloads.regulations.gov/EPA-HQ-OPP-2019-0508-0087/content.pdf
+- Potatoes USA greening fact sheet (2025, מסחרי): https://potatoesusa.com/wp-content/uploads/2025-Potato-Greening-Fact-Sheet-1.pdf
+- Health Canada, maximum levels of glycoalkaloids: https://www.canada.ca/en/health-canada/services/food-nutrition/public-involvement-partnerships/proposal-update-maximum-levels-glycoalkaloids-potato-tubers.html
 
 - Hong Kong CFS, Toxic Glycoalkaloids in Potatoes: https://www.cfs.gov.hk/english/multimedia/multimedia_pub/multimedia_pub_fsf_112_01.html
 - Food Glycoalkaloids: Distribution, Structure (IntechOpen): https://www.intechopen.com/chapters/65187
