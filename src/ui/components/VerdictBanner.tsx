@@ -8,16 +8,18 @@ const SHAPE: Record<Verdict, { name: string; d: string }> = {
   widespread: { name: 'x', d: 'M9 9l30 30M39 9 9 39' },
 };
 
-export function VerdictBanner({ verdict, lighting }: { verdict: Verdict; lighting: Lighting }) {
-  const shape = SHAPE[verdict];
+/** verdict null: nothing judged yet. The live region still renders, so screen readers announce the first verdict when it arrives. */
+export function VerdictBanner({ verdict, lighting }: { verdict: Verdict | null; lighting: Lighting }) {
   return (
     <div aria-live="assertive">
-      <p className="flex items-center gap-3 text-[40px] leading-tight font-bold">
-        <svg data-shape={shape.name} aria-hidden="true" viewBox="0 0 48 48" className="size-12 shrink-0" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round">
-          <path d={shape.d} />
-        </svg>
-        {VERDICT_TEXT[verdict].title}
-      </p>
+      {verdict && (
+        <p className="flex items-center gap-3 text-[40px] leading-tight font-bold">
+          <svg data-shape={SHAPE[verdict].name} aria-hidden="true" viewBox="0 0 48 48" className="size-12 shrink-0" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round">
+            <path d={SHAPE[verdict].d} />
+          </svg>
+          {VERDICT_TEXT[verdict].title}
+        </p>
+      )}
       {lighting !== 'ok' && <p className="mt-1 text-2xl">{LIGHTING_TEXT[lighting]}</p>}
     </div>
   );

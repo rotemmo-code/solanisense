@@ -46,7 +46,8 @@ test('המצלמה נפתחת רק בלחיצה על "התחל סריקה", וה
 });
 test('פסק דין חי כל 300ms; הקראה ורטט רק כשהרמה עולה', async () => {
   const cam = fakeCamera(); const { speak, vibrate } = alerts(); renderScan(); await startTap(); speak.mockClear();
-  await tick(); expect(document.querySelector('[aria-live]')).toBeNull(); // no picture yet: no verdict at all, not even "no green"
+  expect(document.querySelector('[aria-live="assertive"]')).toBeInTheDocument(); // mounted from the tap on, so screen readers announce the first verdict
+  await tick(); expect(document.querySelector('[data-shape]')).toBeNull(); // no picture yet: no verdict at all, not even "no green"
   frame = clean; await tick();
   expect(cam.grab).toHaveBeenLastCalledWith(document.querySelector('video'), 256);
   expect(screen.getByText('לא זוהה ירוק')).toBeInTheDocument(); expect(speak).not.toHaveBeenCalled(); expect(vibrate).not.toHaveBeenCalled();
@@ -64,8 +65,8 @@ test('הקראה ורטט כבויים בהגדרות: שקט, גם בלחיצת
 });
 test('תאורה לא תקינה: הודעה מהניתוח האחרון, פסק הדין קפוא, ובלי סימון', async () => {
   const cam = fakeCamera(); const { vibrate } = alerts(); renderScan(); await startTap();
-  frame = tinted; await tick();
-  expect(screen.getByText('לא זוהה ירוק')).toBeInTheDocument(); expect(screen.getByText('התאורה צבעונית מדי, נסה ליד חלון')).toBeInTheDocument(); expect(vibrate).not.toHaveBeenCalled();
+  frame = tinted; await tick(); // no well-lit frame yet: the lighting message only, no verdict and no check mark
+  expect(screen.getByText('התאורה צבעונית מדי, נסה ליד חלון')).toBeInTheDocument(); expect(document.querySelector('[data-shape]')).toBeNull(); expect(screen.queryByText('לא זוהה ירוק')).toBeNull(); expect(vibrate).not.toHaveBeenCalled();
   expect(cam.paint).not.toHaveBeenCalled();
   frame = local; await tick();
   expect(screen.getByText('הירקרקות מקומית')).toBeInTheDocument(); expect(screen.queryByText(/התאורה/)).toBeNull(); expect(cam.paint).toHaveBeenCalledTimes(1);
@@ -96,6 +97,16 @@ test('סיימתי: onDone עם הפריים החמור ביותר, והמצלמ
   await userEvent.click(screen.getByRole('button', { name: 'סיימתי' }));
   expect(onDone).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ worst: 'local', worstFrame: local }));
   expect(cam.stop).toHaveBeenCalled(); await tick(900); expect(cam.grab).toHaveBeenCalledTimes(2);
+});
+test('סריקה חדשה באותו מסך מתחילה נקייה: בלי פסק דין, סימון או הודעת תאורה ישנים עד פריים חדש', async () => {
+  const cam = fakeCamera(); const { onDone } = renderScan(); const done = () => userEvent.click(screen.getByRole('button', { name: 'סיימתי' }));
+  await startTap(); frame = local; await tick(); expect(screen.getByText('הירקרקות מקומית')).toBeInTheDocument(); expect(cam.paint).toHaveBeenCalledTimes(1);
+  await done(); frame = null; await startTap(); await tick();
+  expect(document.querySelector('[data-shape]')).toBeNull(); expect(cam.paint).toHaveBeenCalledTimes(1); // the first scan's verdict and marks are gone
+  frame = dark; await tick(); await done(); frame = null; await startTap(); await tick();
+  expect(screen.queryByText(/התאורה/)).toBeNull(); // nor its lighting message
+  frame = clean; await tick(); expect(screen.getByText('לא זוהה ירוק')).toBeInTheDocument(); // not the first scan's "local"
+  await done(); expect(onDone).toHaveBeenLastCalledWith(expect.objectContaining({ worst: 'none', worstFrame: clean }));
 });
 test('יציאה מהמסך עוצרת את המצלמה ומפסיקה להאזין לנראות הטאב', async () => {
   const cam = fakeCamera(); const { unmount } = renderScan(); await startTap();

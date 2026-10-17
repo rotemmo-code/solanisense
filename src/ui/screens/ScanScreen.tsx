@@ -18,7 +18,7 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
   const [scan] = useState(() => new ScanState());
   // the camera waits for a start tap: that tap is the user gesture iOS needs before it speaks and Android before it vibrates
   const [phase, setPhase] = useState<'idle' | 'scanning' | 'noCamera'>('idle');
-  const [verdict, setVerdict] = useState<Verdict | null>(null); // null until a frame is analyzed, so no verdict shows before one
+  const [verdict, setVerdict] = useState<Verdict | null>(null); // null until a well-lit frame is analyzed: a check mark before that would judge nothing
   const [lighting, setLighting] = useState<Lighting>('ok');
   const [marks, setMarks] = useState<Marks | null>(null);
   const [unsupported, setUnsupported] = useState(false);
@@ -32,7 +32,7 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
       if (settings.speech) platform.speech.speak(VERDICT_TEXT[worst].speech);
       if (settings.haptics) platform.haptics.vibrate(worst);
     }
-    setVerdict(scan.snapshot.worst);
+    setVerdict(scan.snapshot.worstFrame ? scan.snapshot.worst : null); // the scan keeps its first well-lit frame, so a frame means one was judged
     setLighting(result.lighting);
     setMarks(result.lighting === 'ok' ? { mask: result.mask, width: frame.width, height: frame.height } : null); // marks from a badly lit frame would mislead
   });
@@ -61,6 +61,8 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
 
   const begin = () => {
     if (settings.speech) platform.speech.speak(''); // iOS starts speech only inside a tap; this silent utterance unlocks the verdicts spoken later
+    scan.reset(); // a new scan on the same mount must not inherit the last one's worst, nor show its verdict, lighting or marks
+    setVerdict(null); setLighting('ok'); setMarks(null);
     setPhase('scanning');
   };
   const finish = () => { setPhase('idle'); onDone(scan.snapshot); }; // leaving 'scanning' stops the camera and the loop
@@ -84,7 +86,7 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
     <div className="flex h-full flex-col bg-black text-white">
       {phase !== 'noCamera' && (
         <div className="space-y-2 p-4">
-          {phase === 'scanning' && verdict && <VerdictBanner verdict={verdict} lighting={lighting} />}
+          {phase === 'scanning' && <VerdictBanner verdict={verdict} lighting={lighting} />}
           <p className="text-xl">{SCAN_HINT}</p>
         </div>
       )}
