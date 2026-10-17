@@ -34,3 +34,8 @@ test.each<[string, RGB]>([
   ['אדמדמה (רק a* מעל TINT_A)', [200, 130, 140]], // L* 61.8, a* 28.3, b* 5.9
   ['כחולה (b* שלילי, נתפס בערך המוחלט)', [100, 140, 230]], // L* 59.1, a* 12.4, b* -49.8
 ])('תאורה %s: tinted', (_, rgb) => { expect(a.analyze(makeFrame(16, 16, () => rgb)).lighting).toBe('tinted'); });
+// Fix round 1: GREEN's b* is 41.06, so with the b* tint clause always on, a mostly green tuber read as tinted light and froze the verdict
+test('פקעת ירוקה כולה או ברובה: התאורה ok ולא tinted', () => {
+  const full = a.analyze(makeFrame(64, 64, () => GREEN)); expect(full.lighting).toBe('ok'); expect(full.greenRatio).toBeGreaterThan(0.10);
+  expect(a.analyze(makeFrame(64, 64, (x, y) => ((x + y) % 5 < 3 ? GREEN : BROWN))).lighting).toBe('ok'); // 60.0% of the frame, 59.8% of the ROI
+});

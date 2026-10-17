@@ -24,7 +24,8 @@ export class LocalGreenAnalyzer implements Analyzer {
     }
     if (roi.length === 0) return { greenRatio: 0, mask, lighting: 'dark' }; // empty frame: nothing to judge, and 'dark' keeps the verdict frozen
     const [medianL, medianA, medianB] = [0, 1, 2].map((k) => median(lab.map((p) => p[k])));
-    const lighting: Lighting = medianL < T.DARK_L ? 'dark' : Math.abs(medianB) > T.TINT_B || medianA > T.TINT_A ? 'tinted' : 'ok';
+    // b* is skipped when the median is already green: a yellow-green tuber has a high b*, and calling that tinted light would freeze its verdict
+    const lighting: Lighting = medianL < T.DARK_L ? 'dark' : medianA > T.TINT_A || (medianA >= T.A_ABS && Math.abs(medianB) > T.TINT_B) ? 'tinted' : 'ok';
     let green = 0;
     lab.forEach(([L, a], k) => {
       // medianA < A_ABS: when most of the ROI is green the median is green too, and the relative test alone would miss a fully green tuber

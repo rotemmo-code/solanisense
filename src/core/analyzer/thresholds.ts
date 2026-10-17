@@ -6,7 +6,7 @@ export const THRESHOLDS = {
   NOISE_FLOOR: 0.01, // green ratio below this is noise: verdict none
   WIDESPREAD: 0.10, // green ratio where the verdict becomes widespread
   DARK_L: 25, // median L* below this: lighting dark
-  TINT_B: 35, // |median b*| above this: lighting tinted
+  TINT_B: 35, // |median b*| above this: lighting tinted, unless the median a* is already green (below A_ABS)
   TINT_A: 20, // median a* above this: lighting tinted
   ROI_FRACTION: 0.8, // ROI ellipse semi-axes as a fraction of half the frame width and height
 } as const;
