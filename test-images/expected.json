@@ -1,0 +1,14 @@
+{
+  "synthetic/daylight-potato-clean.png": "none",
+  "synthetic/daylight-potato-green-spot.png": "local",
+  "synthetic/warm-2700k-potato-clean.png": "none",
+  "synthetic/warm-2700k-potato-green-spot.png": "local",
+  "synthetic/cool-6500k-potato-clean.png": "none",
+  "synthetic/cool-6500k-potato-green-spot.png": "local",
+  "synthetic/fluorescent-potato-clean.png": "none",
+  "synthetic/fluorescent-potato-green-spot.png": "local",
+  "synthetic/mixed-potato-clean.png": "none",
+  "synthetic/mixed-potato-green-spot.png": "local",
+  "synthetic/dim-potato-clean.png": "dark",
+  "synthetic/dim-potato-green-spot.png": "dark"
+}

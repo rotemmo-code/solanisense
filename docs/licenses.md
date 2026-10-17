@@ -15,9 +15,11 @@
 | @testing-library/user-event | 14.6.7 | MIT | devDependencies |
 | @testing-library/dom | 10.4.2 | MIT | peer של @testing-library/react, הותקן אוטומטית |
 | @types/node | 24.19.2 | MIT | devDependencies |
+| @types/pngjs | 6.0.5 | MIT | devDependencies |
 | @types/react | 19.3.0 | MIT | devDependencies |
 | @types/react-dom | 19.3.0 | MIT | devDependencies |
 | @vitejs/plugin-react | 6.1.2 | MIT | devDependencies |
+| jpeg-js | 0.4.4 | BSD-3-Clause | devDependencies |
 | jsdom | 30.1.3 | MIT | devDependencies |
 | pngjs | 7.0.0 | MIT | devDependencies |
 | tailwindcss | 4.3.3 | MIT | devDependencies |
@@ -28,7 +30,7 @@
 
 התלויות העיקריות של vite-plugin-pwa הן workbox-build ו-workbox-window, גרסה 7.4.1, MIT.
 
-@playwright/test מביאה את playwright ואת playwright-core, גרסה 1.64.1, Apache-2.0. pngjs (בלי תלויות) מייצרת את תמונות הבדיקה הסינתטיות.
+@playwright/test מביאה את playwright ואת playwright-core, גרסה 1.64.1, Apache-2.0. pngjs (בלי תלויות) מייצרת את תמונות הבדיקה הסינתטיות וקוראת אותן במטריצת התאורה. jpeg-js (בלי תלויות) קוראת שם את התמונות האמיתיות, שמגיעות מהטלפון כ-JPEG. שתיהן בבדיקות בלבד.
 
 ## דפדפן לבדיקות קצה-לקצה
 
