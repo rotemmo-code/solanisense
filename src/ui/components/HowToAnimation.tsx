@@ -52,6 +52,9 @@ export function HowToAnimation() {
     return () => clearInterval(timer);
   }, [auto]);
 
+  // leaving the screen stops a step being read; not in the effect above, whose cleanup also runs when a press turns auto off
+  useEffect(() => () => platform.speech.cancel(), []);
+
   const go = (by: number) => { setAuto(false); setStep(s => (s + by + STEPS.length) % STEPS.length); };
   const read = () => { setAuto(false); platform.speech.speak(STEPS[step]); };
 

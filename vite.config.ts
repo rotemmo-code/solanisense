@@ -10,6 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeManifestIcons: false, // 590 KB the app never shows; the browser fetches the icons when installing
       manifest: {
         name: 'SolaniSense',
         short_name: 'SolaniSense',
