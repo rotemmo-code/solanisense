@@ -5,13 +5,14 @@ import { ScanState, type ScanSnapshot } from '../../core/verdict';
 import { platform } from '../../platform';
 import { frameFromFile } from '../../platform/camera';
 import type { Settings } from '../../platform/storage';
+import { Icon } from '../components/Icon';
 import { type Marks, Overlay } from '../components/Overlay';
 import { VerdictBanner } from '../components/VerdictBanner';
 import { SCAN_HINT, SCAN_TEXT, VERDICT_TEXT } from '../strings';
+import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '../styles';
 
 const analyzer = new LocalGreenAnalyzer();
 const FRAME_WIDTH = 256; // spec 4.1
-const BUTTON = 'flex min-h-14 w-full items-center justify-center rounded-xl px-6 text-2xl font-bold';
 
 export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (snap: ScanSnapshot) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -83,26 +84,28 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
   };
 
   return (
-    <div className="flex h-full flex-col bg-black text-white">
+    <div className="flex h-full flex-col gap-4 p-4">
       {phase !== 'noCamera' && (
-        <div className="space-y-2 p-4">
+        <div className="space-y-2">
           {phase === 'scanning' && <VerdictBanner verdict={verdict} lighting={lighting} />}
-          <p className="text-xl">{SCAN_HINT}</p>
+          <p className="text-xl text-text-muted">{SCAN_HINT}</p>
         </div>
       )}
-      <div className="relative flex min-h-0 flex-1 items-center justify-center p-4">
+      {/* the camera frame: the video and its marks fill it while scanning */}
+      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-card bg-surface p-4">
         {phase === 'scanning' && (
           <>
             <video ref={videoRef} className="absolute inset-0 size-full object-contain" />
             <Overlay marks={marks} />
           </>
         )}
-        {phase === 'idle' && <button type="button" onClick={begin} className={`${BUTTON} bg-white text-black`}>{SCAN_TEXT.start}</button>}
+        {phase === 'idle' && <button type="button" onClick={begin} className={PRIMARY_BUTTON}><Icon name="camera" />{SCAN_TEXT.start}</button>}
         {phase === 'noCamera' && <p role="alert" className="text-2xl">{SCAN_TEXT.noCamera}</p>}
       </div>
-      <div className="flex flex-col gap-3 p-4">
-        {phase === 'scanning' && <button type="button" onClick={finish} className={`${BUTTON} bg-white text-black`}>{SCAN_TEXT.done}</button>}
-        <label className={`${BUTTON} cursor-pointer border-2 border-white focus-within:outline-4 focus-within:outline-offset-2 focus-within:outline-white`}>
+      <div className="flex flex-col gap-3">
+        {phase === 'scanning' && <button type="button" onClick={finish} className={PRIMARY_BUTTON}>{SCAN_TEXT.done}</button>}
+        <label className={`${SECONDARY_BUTTON} cursor-pointer focus-within:outline-4 focus-within:outline-offset-2 focus-within:outline-text`}>
+          <Icon name="upload" />
           {SCAN_TEXT.upload}
           <input type="file" accept="image/*" aria-label={SCAN_TEXT.upload} onChange={onFile} className="sr-only" />
         </label>

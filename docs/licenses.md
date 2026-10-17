@@ -69,3 +69,7 @@ type-fest 0.16.0 (דרך workbox-build ו-tempy) ברישיון כפול MIT OR 
 | חבילה | גרסה | רישיון | למה לא |
 |---|---|---|---|
 | sharp | 0.35.5 | Apache-2.0, אבל הבינארי ל-Windows (@img/sharp-win32-x64) הוא Apache-2.0 AND LGPL-3.0-or-later | נשקלה ליצירת אייקוני ה-PWA. האייקונים נוצרו במקומה עם System.Drawing של Windows (scripts/make-icons.ps1), בלי תלות חדשה. |
+
+## גופן
+
+Rubik: רישיון OFL-1.1 (SIL Open Font License 1.1), נטען בזמן ריצה מ-Google Fonts (fonts.googleapis.com, fonts.gstatic.com) ולא נארז באפליקציה. אומת ב-https://github.com/google/fonts/blob/main/ofl/rubik/OFL.txt, 2026-10-17.

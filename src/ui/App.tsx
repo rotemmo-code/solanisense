@@ -16,7 +16,7 @@ export default function App() {
   const showResult = (s: ScanSnapshot) => { setSnapshot(s); setScreen('result'); };
 
   return (
-    <div className="flex h-dvh flex-col bg-black text-white">
+    <div className="flex h-dvh flex-col bg-bg font-sans text-text">
       <main className="min-h-0 flex-1 overflow-y-auto">
         {screen === 'scan' && <ScanScreen settings={settings} onDone={showResult} />}
         {screen === 'result' && snapshot && <ResultScreen snapshot={snapshot} onAgain={() => setScreen('scan')} />}

@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import type { ScanSnapshot } from '../../core/verdict';
+import { Icon } from '../components/Icon';
 import { drawOverlay } from '../components/Overlay.drawing';
 import { VerdictBanner } from '../components/VerdictBanner';
 import { CULTIVAR_WARNING, NOTHING_ANALYZED, RESULT_TEXT, VERDICT_TEXT } from '../strings';
+import { CARD, PRIMARY_BUTTON } from '../styles';
 
 export function ResultScreen({ snapshot, onAgain }: { snapshot: ScanSnapshot; onAgain: () => void }) {
   const { worst, worstFrame: frame, worstMask: mask } = snapshot;
@@ -24,16 +26,18 @@ export function ResultScreen({ snapshot, onAgain }: { snapshot: ScanSnapshot; on
     <div className="flex flex-col gap-4 p-4">
       {frame ? (
         <>
-          <VerdictBanner verdict={worst} lighting="ok" />
-          <canvas ref={ref} width={frame.width} height={frame.height} role="img" aria-label={label} className="max-h-[50dvh] w-full object-contain" />
-          {percent && <p className="text-2xl"><span className="font-bold">{percent}</span> {RESULT_TEXT.percent}</p>}
-          <p className="text-2xl">{VERDICT_TEXT[worst].advice}</p>
+          <div className={CARD}><VerdictBanner verdict={worst} lighting="ok" /></div>
+          <canvas ref={ref} width={frame.width} height={frame.height} role="img" aria-label={label} className="max-h-[50dvh] w-full rounded-card object-contain" />
+          <div className={`${CARD} space-y-3`}>
+            {percent && <p className="text-2xl"><span className="font-bold">{percent}</span> {RESULT_TEXT.percent}</p>}
+            <p className="text-2xl">{VERDICT_TEXT[worst].advice}</p>
+          </div>
         </>
       ) : (
-        <p className="text-2xl font-bold">{NOTHING_ANALYZED}</p>
+        <p className={`${CARD} text-2xl font-bold`}>{NOTHING_ANALYZED}</p>
       )}
       <p className="text-xl">{CULTIVAR_WARNING}</p>
-      <button type="button" onClick={onAgain} className="flex min-h-14 w-full items-center justify-center rounded-xl bg-white px-6 text-2xl font-bold text-black">{RESULT_TEXT.again}</button>
+      <button type="button" onClick={onAgain} className={PRIMARY_BUTTON}><Icon name="camera" />{RESULT_TEXT.again}</button>
     </div>
   );
 }

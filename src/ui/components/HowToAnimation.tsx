@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { platform } from '../../platform';
 import { HOWTO_TEXT } from '../strings';
+import { Icon } from './Icon';
 
 const STEPS = HOWTO_TEXT.steps;
-const BUTTON = 'min-h-14 flex-1 rounded-xl border-2 border-white px-2 text-xl font-bold';
+const BUTTON = 'flex min-h-14 flex-1 items-center justify-center gap-1.5 rounded-card border-2 border-secondary px-2 text-xl font-bold';
 const POTATO = <ellipse cx="128" cy="80" rx="86" ry="54" fill="#c9955b" stroke="#f3dcb5" strokeWidth="3" />;
 // green is striped, never color alone, like the marks on the scan
 const GREEN = { fill: 'url(#howto-green)', stroke: 'white', strokeWidth: 2 };
@@ -60,7 +61,7 @@ export function HowToAnimation() {
 
   return (
     <div className="space-y-3">
-      <svg viewBox="0 0 240 150" aria-hidden="true" className="w-full">
+      <svg viewBox="0 0 240 150" aria-hidden="true" className="w-full rounded-card bg-bg">
         <defs>
           <pattern id="howto-green" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <rect width="8" height="8" fill="#6f9a3a" />
@@ -74,7 +75,7 @@ export function HowToAnimation() {
       <p className="min-h-[4lh] text-2xl">{STEPS[step]}</p>
       <div className="flex gap-2">
         <button type="button" onClick={() => go(-1)} className={BUTTON}>{HOWTO_TEXT.prev}</button>
-        <button type="button" onClick={read} className={BUTTON}>{HOWTO_TEXT.read}</button>
+        <button type="button" onClick={read} className={BUTTON}><Icon name="speaker" className="size-6" />{HOWTO_TEXT.read}</button>
         <button type="button" onClick={() => go(1)} className={BUTTON}>{HOWTO_TEXT.next}</button>
       </div>
     </div>
