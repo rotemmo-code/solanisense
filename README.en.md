@@ -34,6 +34,12 @@ The app never says "safe" and never shows a "solanine level". The disclaimer, as
 
 The three mockups below illustrate the planned design system; they are not screenshots of the app. The current UI is still unstyled (see status above). Source: `docs/design/mockups/mockups.html`.
 
+### Concept image
+
+![Concept image generated with Gemini: a phone held in a kitchen, the screen shows a potato with a green area outlined in white stripes](docs/design/concept/app-concept-900.jpg)
+
+Generated with Gemini from [the prompt](docs/design/gemini-image-prompt.md) as a mood illustration only. The on-screen texts are not the app's wording: the app never says "contains solanine", because green is a warning sign, not a toxin measurement. Full-resolution original: `docs/design/concept/app-concept.jpeg`.
+
 | Live scan | Result | Info |
 |---|---|---|
 | ![Scan screen mockup: "no green detected" verdict with a check-in-circle shape, dashed ellipse guide over the video, a "Done" button](docs/design/mockups/01-scan.png) | ![Result screen mockup: "local greening" with a triangle shape, the green area outlined with white stripes, advice with sources, a "scan another" button](docs/design/mockups/02-result.png) | ![Info screen mockup: speech and vibration switches, "how to clean" illustration, an info card with its source](docs/design/mockups/03-info.png) |
