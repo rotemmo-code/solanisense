@@ -87,3 +87,8 @@ test('רק מה שמופעל בהגדרות; הודעה ניטרלית שותק�
   render(<ResultScreen snapshot={{ ...snap, worst: 'none', worstRatio: 0, worstFrame: null, worstMask: null }} {...base} settings={DEFAULT_SETTINGS} />); // nothing analyzed
   expect(speak).not.toHaveBeenCalled(); expect(vibrate).not.toHaveBeenCalled();
 });
+test('מקומית מעוגלת כלפי מטה: 9.99% מוצג 9% ולא 10% ליד "מקומית"', () => {
+  render(<ResultScreen snapshot={{ ...snap, worstRatio: 0.0999 }} {...base} />);
+  expect(screen.getByText('9%')).toBeInTheDocument(); expect(screen.queryByText('10%')).toBeNull();
+  expect(screen.getByRole('img')).toHaveAccessibleName('התמונה שנסרקה: הירקרקות מקומית, 9% מהשטח בתמונה ירוק');
+});

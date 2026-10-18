@@ -28,8 +28,10 @@ export function ResultScreen({ snapshot, source, settings, onAgain }: { snapshot
     if (settings.haptics) platform.haptics.vibrate(worst); // 'none' has an empty pattern, which the platform skips
   }, []);
 
-  // below the noise floor the share is noise, and "1%" beside "no green detected" would contradict the verdict
-  const percent = worst === 'none' ? null : `${Math.round(snapshot.worstRatio * 100)}%`;
+  // below the noise floor the share is noise, and "1%" beside "no green detected" would contradict the verdict;
+  // local is floored, because rounding showed "10%" beside "local" for 9.5 to 9.99%
+  const share = snapshot.worstRatio * 100;
+  const percent = worst === 'none' ? null : `${worst === 'local' ? Math.floor(share) : Math.round(share)}%`;
   const label = `${RESULT_TEXT.image}: ${VERDICT_TEXT[worst].title}${percent ? `, ${percent} ${RESULT_TEXT.percent}` : ''}`;
 
   return (
