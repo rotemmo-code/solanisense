@@ -62,8 +62,9 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
     return () => { document.removeEventListener('visibilitychange', onVisibility); stop(); };
   }, [phase]);
 
+  const unlockSpeech = () => { if (settings.speech) platform.speech.speak(''); }; // iOS starts speech only inside a tap; this silent utterance unlocks the verdicts spoken later
   const begin = () => {
-    if (settings.speech) platform.speech.speak(''); // iOS starts speech only inside a tap; this silent utterance unlocks the verdicts spoken later
+    unlockSpeech();
     scan.reset(); // a new scan on the same mount must not inherit the last one's worst, nor show its verdict, lighting or marks
     setVerdict(null); setLighting('ok'); setMarks(null);
     setPhase('scanning');
@@ -107,7 +108,8 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
         {phase === 'scanning' && <button type="button" onClick={() => finish('live')} className={`${BUTTON} bg-white text-black`}>{SCAN_TEXT.done}</button>}
         <label className={`${BUTTON} cursor-pointer border-2 border-white focus-within:outline-4 focus-within:outline-offset-2 focus-within:outline-white`}>
           {SCAN_TEXT.upload}
-          <input type="file" accept="image/*" aria-label={SCAN_TEXT.upload} onChange={onFile} className="sr-only" />
+          {/* the tap that opens the picker unlocks speech too: the result screen speaks the upload's verdict after the decode, outside any tap */}
+          <input type="file" accept="image/*" aria-label={SCAN_TEXT.upload} onClick={unlockSpeech} onChange={onFile} className="sr-only" />
         </label>
         {unsupported && <p role="alert" className="text-2xl">{SCAN_TEXT.unsupported}</p>}
       </div>

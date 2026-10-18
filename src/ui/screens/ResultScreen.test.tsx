@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { THRESHOLDS as T } from '../../core/analyzer/thresholds';
+import { platform } from '../../platform';
+import { DEFAULT_SETTINGS } from '../../platform/storage';
 import * as drawing from '../components/Overlay.drawing';
 import { CULTIVAR_WARNING, NOTHING_ANALYZED, TOO_FEW_FRAMES, VERDICT_TEXT } from '../strings';
 import { ResultScreen } from './ResultScreen';
@@ -10,7 +12,7 @@ beforeEach(() => { vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockRetur
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 const snap = { worst: 'local' as const, worstRatio: 0.042, worstFrame: { width: 2, height: 2, data: new Uint8ClampedArray(16) }, worstMask: new Uint8Array(4), okFrames: T.MIN_OK_FRAMES_FOR_NONE };
-const base = { source: 'live' as const, onAgain: () => {} }; // fix wave: the result needs the snapshot's source
+const base = { source: 'live' as const, settings: { speech: false, haptics: false }, onAgain: () => {} }; // fix wave: the result needs the snapshot's source, and speaks per the settings
 test('מציג פסק דין, אחוז, הנחיה ואזהרת זנים', () => { render(<ResultScreen snapshot={snap} {...base} />); expect(screen.getByText('הירקרקות מקומית')).toBeInTheDocument(); expect(screen.getByText('4%')).toBeInTheDocument(); expect(screen.getByText(VERDICT_TEXT.local.advice)).toBeInTheDocument(); expect(screen.getByText(CULTIVAR_WARNING)).toBeInTheDocument(); });
 test('סרוק עוד אחד', async () => { const f = vi.fn(); render(<ResultScreen snapshot={snap} {...base} onAgain={f} />); await userEvent.click(screen.getByRole('button', { name: 'סרוק עוד אחד' })); expect(f).toHaveBeenCalled(); });
 // Replaces the brief's third test (controller ruling 1): no frame means nothing was judged, so no verdict, not even "no green"
@@ -63,4 +65,25 @@ test('מספיק פריימים, העלאה של תמונה אחת, או ירו�
   expect(screen.getByText('לא זוהה ירוק')).toBeInTheDocument(); expect(screen.queryByText(TOO_FEW_FRAMES)).toBeNull(); upload.unmount();
   render(<ResultScreen snapshot={{ ...snap, okFrames: 1 }} {...base} />);
   expect(screen.getByText('הירקרקות מקומית')).toBeInTheDocument(); expect(screen.queryByText(TOO_FEW_FRAMES)).toBeNull();
+});
+
+// Fix wave: the result speaks and vibrates its verdict once, per the settings; a neutral message stays silent
+const alerts = () => ({ speak: vi.spyOn(platform.speech, 'speak').mockImplementation(() => {}), vibrate: vi.spyOn(platform.haptics, 'vibrate').mockImplementation(() => {}) });
+test.each(['none', 'local', 'widespread'] as const)('תוצאה %s: הקראה ורטט פעם אחת, גם אחרי רינדור חוזר', (v) => {
+  const { speak, vibrate } = alerts(); const snapshot = { ...snap, worst: v };
+  const { rerender } = render(<ResultScreen snapshot={snapshot} {...base} settings={DEFAULT_SETTINGS} />);
+  rerender(<ResultScreen snapshot={snapshot} {...base} settings={DEFAULT_SETTINGS} />);
+  expect(speak).toHaveBeenCalledExactlyOnceWith(VERDICT_TEXT[v].speech);
+  expect(vibrate).toHaveBeenCalledExactlyOnceWith(v); // 'none' maps to an empty pattern, which WebHaptics skips (haptics.test)
+});
+test('רק מה שמופעל בהגדרות; הודעה ניטרלית שותקת', () => {
+  const { speak, vibrate } = alerts();
+  render(<ResultScreen snapshot={snap} {...base} settings={{ speech: true, haptics: false }} />).unmount();
+  expect(speak).toHaveBeenCalledExactlyOnceWith(VERDICT_TEXT.local.speech); expect(vibrate).not.toHaveBeenCalled();
+  render(<ResultScreen snapshot={snap} {...base} settings={{ speech: false, haptics: true }} />).unmount();
+  expect(vibrate).toHaveBeenCalledExactlyOnceWith('local'); expect(speak).toHaveBeenCalledTimes(1);
+  speak.mockClear(); vibrate.mockClear();
+  render(<ResultScreen snapshot={{ ...snap, worst: 'none', worstRatio: 0, okFrames: 1 }} {...base} settings={DEFAULT_SETTINGS} />).unmount(); // too few frames
+  render(<ResultScreen snapshot={{ ...snap, worst: 'none', worstRatio: 0, worstFrame: null, worstMask: null }} {...base} settings={DEFAULT_SETTINGS} />); // nothing analyzed
+  expect(speak).not.toHaveBeenCalled(); expect(vibrate).not.toHaveBeenCalled();
 });

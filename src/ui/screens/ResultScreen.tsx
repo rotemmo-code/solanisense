@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { THRESHOLDS as T } from '../../core/analyzer/thresholds';
 import type { ScanSnapshot } from '../../core/verdict';
+import { platform } from '../../platform';
+import type { Settings } from '../../platform/storage';
 import { drawOverlay } from '../components/Overlay.drawing';
 import { VerdictBanner } from '../components/VerdictBanner';
 import { CULTIVAR_WARNING, NOTHING_ANALYZED, RESULT_TEXT, TOO_FEW_FRAMES, VERDICT_TEXT } from '../strings';
 
-export function ResultScreen({ snapshot, source, onAgain }: { snapshot: ScanSnapshot; source: 'live' | 'upload'; onAgain: () => void }) {
+export function ResultScreen({ snapshot, source, settings, onAgain }: { snapshot: ScanSnapshot; source: 'live' | 'upload'; settings: Settings; onAgain: () => void }) {
   const { worst, worstFrame: frame, worstMask: mask } = snapshot;
   // no verdict without a well-lit frame; a live 'none' also needs a few seconds of them, while an upload is one deliberate image
   const neutral = !frame ? NOTHING_ANALYZED : worst === 'none' && source === 'live' && snapshot.okFrames < T.MIN_OK_FRAMES_FOR_NONE ? TOO_FEW_FRAMES : null;
@@ -18,6 +20,13 @@ export function ResultScreen({ snapshot, source, onAgain }: { snapshot: ScanSnap
     ctx.putImageData(new ImageData(frame.data, frame.width, frame.height), 0, 0);
     if (mask) drawOverlay(ctx, mask, frame.width, frame.height, 1, 1);
   }, [frame, mask]);
+
+  // once, when the result appears (App mounts a new screen for each result): a verdict is spoken and felt, a neutral message is not
+  useEffect(() => {
+    if (neutral) return;
+    if (settings.speech) platform.speech.speak(VERDICT_TEXT[worst].speech);
+    if (settings.haptics) platform.haptics.vibrate(worst); // 'none' has an empty pattern, which the platform skips
+  }, []);
 
   // below the noise floor the share is noise, and "1%" beside "no green detected" would contradict the verdict
   const percent = worst === 'none' ? null : `${Math.round(snapshot.worstRatio * 100)}%`;

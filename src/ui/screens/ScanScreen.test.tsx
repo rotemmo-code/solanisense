@@ -143,3 +143,12 @@ test('"לא זוהה ירוק" רק אחרי MIN_OK_FRAMES_FOR_NONE פריימי
   frame = dark; await tick(); expect(document.querySelector('[data-shape]')).toBeNull(); // a dark frame is no evidence
   frame = clean; await tick(); expect(document.querySelector('[data-shape="check"]')).not.toBeNull(); expect(screen.getByText('לא זוהה ירוק')).toBeInTheDocument();
 });
+// Fix wave: the result screen now speaks an upload's verdict after the decode, outside any tap, so the upload tap unlocks speech the way the start tap does
+test('הלחיצה על "העלה תמונה" משחררת הקראה ב-iOS, רק כשההקראה מופעלת', async () => {
+  const { speak } = alerts(); vi.spyOn(cameraModule, 'frameFromFile').mockResolvedValue(local);
+  const file = new File(['x'], 'a.jpg', { type: 'image/jpeg' });
+  const first = renderScan(); await userEvent.upload(screen.getByLabelText('העלה תמונה'), file);
+  expect(speak).toHaveBeenCalledExactlyOnceWith(''); expect(first.onDone).toHaveBeenCalledTimes(1);
+  first.unmount(); speak.mockClear(); renderScan({ speech: false, haptics: true });
+  await userEvent.upload(screen.getByLabelText('העלה תמונה'), file); expect(speak).not.toHaveBeenCalled();
+});

@@ -19,7 +19,7 @@ export default function App() {
     <div className="flex h-dvh flex-col bg-black text-white">
       <main className="min-h-0 flex-1 overflow-y-auto">
         {screen === 'scan' && <ScanScreen settings={settings} onDone={showResult} />}
-        {screen === 'result' && result && <ResultScreen {...result} onAgain={() => setScreen('scan')} />}
+        {screen === 'result' && result && <ResultScreen {...result} settings={settings} onAgain={() => setScreen('scan')} />}
         {screen === 'info' && <InfoScreen settings={settings} onSettings={changeSettings} />}
       </main>
       {/* the result is a state of the scan, not a destination of its own (spec 2.4) */}
