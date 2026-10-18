@@ -39,3 +39,13 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, mask: Uint8Array, wid
   ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.stroke(); // the white fill then covers the inner half, leaving a 1px black edge
   ctx.fillStyle = 'white'; ctx.fill();
 }
+
+/** The analyzed ellipse (spec 4.1) as a 2px white dashed line over a black halo, centered in a width x height picture, so the user can fill it with the potato */
+export function drawRoiGuide(ctx: CanvasRenderingContext2D, width: number, height: number, fraction: number): void {
+  ctx.save(); // the dash must not leak into the marks drawn next
+  ctx.beginPath();
+  ctx.ellipse(width / 2, height / 2, (fraction * width) / 2, (fraction * height) / 2, 0, 0, 2 * Math.PI);
+  ctx.strokeStyle = 'black'; ctx.lineWidth = 4; ctx.stroke(); // 1px of black on each side of the white line, and in its gaps
+  ctx.setLineDash([8, 6]); ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.restore();
+}

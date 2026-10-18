@@ -1,4 +1,4 @@
-import { drawOverlay, outlineOf } from './Overlay.drawing';
+import { drawOverlay, drawRoiGuide, outlineOf } from './Overlay.drawing';
 
 test('outline: ריבוע 4x4 בתוך 8x8 נותן 12 פיקסלי מתאר', () => { const m = new Uint8Array(64); for (let y = 2; y < 6; y++) for (let x = 2; x < 6; x++) m[y * 8 + x] = 1; const o = outlineOf(m, 8, 8); expect(Array.from(o).reduce((a, b) => a + b, 0)).toBe(12); });
 test('outline של mask ריק ריק', () => { expect(Array.from(outlineOf(new Uint8Array(16), 4, 4)).every(v => v === 0)).toBe(true); });
@@ -17,7 +17,7 @@ const recorder = () => {
   const ctx = {
     strokeStyle: '', fillStyle: '', lineWidth: 0,
     save: () => log.push('save'), restore: () => log.push('restore'), beginPath: () => log.push('beginPath'), clip: () => log.push('clip'),
-    rect: (...a: number[]) => log.push(`rect ${a.join(' ')}`), moveTo: (...a: number[]) => moves.push(a), lineTo: () => {},
+    rect: (...a: number[]) => log.push(`rect ${a.join(' ')}`), ellipse: (...a: number[]) => log.push(`ellipse ${a.join(' ')}`), setLineDash: (d: number[]) => log.push(`dash ${d.join(' ')}`), moveTo: (...a: number[]) => moves.push(a), lineTo: () => {},
     stroke() { log.push(`stroke ${this.strokeStyle} ${this.lineWidth}`); }, fill() { log.push(`fill ${this.fillStyle}`); },
   };
   return { ctx: ctx as unknown as CanvasRenderingContext2D, log, moves };
@@ -34,4 +34,10 @@ test('drawOverlay: mask ריק לא מצייר; אחרת פסים בתוך ה-ma
     'beginPath', 'rect 0 -0.5 10 3', 'rect 10 -0.5 10 3', 'rect 10 1.5 10 3', 'stroke black 2', 'fill white',
   ]);
   expect(moves[1][0] - moves[0][0]).toBeCloseTo(6 * Math.SQRT2); // 45° stripes 6px apart, measured across them
+});
+// Fix wave: the ROI guide, the ellipse the analyzer judges
+test('drawRoiGuide: אליפסה במרכז ברדיוסים של fraction, קו לבן מקווקו של 2px על הילה שחורה, והמקף לא דולף החוצה', () => {
+  const { ctx, log } = recorder();
+  drawRoiGuide(ctx, 200, 100, 0.8);
+  expect(log).toEqual(['save', 'beginPath', `ellipse 100 50 80 40 0 0 ${2 * Math.PI}`, 'stroke black 4', 'dash 8 6', 'stroke white 2', 'restore']);
 });

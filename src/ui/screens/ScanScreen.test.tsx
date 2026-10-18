@@ -5,13 +5,14 @@ import type { Frame } from '../../core/analyzer/types';
 import { platform } from '../../platform';
 import * as cameraModule from '../../platform/camera';
 import { DEFAULT_SETTINGS, type Settings } from '../../platform/storage';
+import * as drawing from '../components/Overlay.drawing';
 import { VERDICT_TEXT } from '../strings';
 import { ScanScreen } from './ScanScreen';
 
 let frame: Frame | null = null;
 afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); frame = null; delete (navigator as any).mediaDevices; delete (document as any).visibilityState; });
 
-test('בלי מצלמה: הסבר וכפתור העלאה', async () => { Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: () => Promise.reject(new Error('denied')) }, configurable: true }); render(<ScanScreen settings={DEFAULT_SETTINGS} onDone={() => {}} />); await userEvent.click(screen.getByRole('button', { name: 'התחל סריקה' })); expect(await screen.findByText(/אין גישה למצלמה/)).toBeInTheDocument(); expect(screen.getByLabelText('העלה תמונה')).toBeInTheDocument(); });
+test('בלי מצלמה: הסבר וכפתור העלאה', async () => { vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null); Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: () => Promise.reject(new Error('denied')) }, configurable: true }); render(<ScanScreen settings={DEFAULT_SETTINGS} onDone={() => {}} />); await userEvent.click(screen.getByRole('button', { name: 'התחל סריקה' })); expect(await screen.findByText(/אין גישה למצלמה/)).toBeInTheDocument(); expect(screen.getByLabelText('העלה תמונה')).toBeInTheDocument(); });
 test('קובץ לא נתמך: הודעה', async () => { vi.spyOn(cameraModule, 'frameFromFile').mockRejectedValue(new Error('unsupported')); render(<ScanScreen settings={DEFAULT_SETTINGS} onDone={() => {}} />); await userEvent.upload(screen.getByLabelText('העלה תמונה'), new File(['x'], 'a.heic', { type: 'image/heic' })); expect(await screen.findByText('הקובץ לא נתמך')).toBeInTheDocument(); });
 
 // Added: the start tap, the 300 ms loop, alerts on a rise only, the lighting gate, pausing in a hidden tab, cancelled starts, done and upload.
@@ -25,7 +26,10 @@ const dark = makeFrame(20, 20, () => [10, 10, 10]), tinted = withSquare(7, 14, [
 const fakeCamera = () => {
   vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
   return {
-    paint: vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null), // the overlay asks for a context only when it has marks; jsdom has none, Overlay.test covers the drawing
+    // fix wave: the overlay now asks for a context on every repaint, for the ROI guide, so marks are counted where they are drawn; Overlay.test covers the drawing
+    ctx: vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({ translate() {} } as never),
+    paint: vi.spyOn(drawing, 'drawOverlay').mockImplementation(() => {}),
+    guide: vi.spyOn(drawing, 'drawRoiGuide').mockImplementation(() => {}),
     start: vi.spyOn(platform.camera, 'start').mockResolvedValue(),
     stop: vi.spyOn(platform.camera, 'stop').mockImplementation(() => {}),
     grab: vi.spyOn(platform.camera, 'grabFrame').mockImplementation(() => frame),
@@ -43,6 +47,7 @@ test('המצלמה נפתחת רק בלחיצה על "התחל סריקה", וה
   await startTap();
   expect(cam.start).toHaveBeenCalledExactlyOnceWith(document.querySelector('video')); expect(speak).toHaveBeenCalledExactlyOnceWith('');
   expect(screen.getByRole('button', { name: 'סיימתי' })).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'התחל סריקה' })).toBeNull();
+  expect(cam.guide).toHaveBeenCalledTimes(1); expect(cam.grab).not.toHaveBeenCalled(); // fix wave: the ROI guide is up before the first frame
 });
 test('פסק דין חי כל 300ms; הקראה ורטט רק כשהרמה עולה', async () => {
   const cam = fakeCamera(); const { speak, vibrate } = alerts(); renderScan(); await startTap(); speak.mockClear();

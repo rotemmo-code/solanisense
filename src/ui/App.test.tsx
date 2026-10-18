@@ -16,6 +16,7 @@ test('שורש RTL ועברית', () => { expect(document.documentElement.getAtt
 // the result as a state of the scan, a fresh scan each time, and settings loaded once and saved on change
 test('index.html עצמו מגדיר עברית ו-RTL על השורש', () => { expect(html).toMatch(/<html lang="he" dir="rtl">/); });
 test('יציאה באמצע סריקה עוצרת את המצלמה, וחזרה לסריקה פותחת מסך חדש שמחכה ללחיצה', async () => {
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null); // jsdom has no canvas; the overlay asks for one to draw the ROI guide
   const start = vi.spyOn(platform.camera, 'start').mockResolvedValue(); const stop = vi.spyOn(platform.camera, 'stop').mockImplementation(() => {});
   render(<App />);
   await userEvent.click(screen.getByRole('button', { name: 'התחל סריקה' })); expect(start).toHaveBeenCalledTimes(1);
