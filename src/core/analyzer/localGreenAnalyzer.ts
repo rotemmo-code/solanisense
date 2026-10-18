@@ -10,6 +10,8 @@ const median = (v: number[]) => {
 export class LocalGreenAnalyzer implements Analyzer {
   analyze({ width, height, data }: Frame): AnalysisResult {
     const mask = new Uint8Array(width * height);
+    // a buffer of the wrong length would misread every pixel; 'dark' freezes the verdict instead of a silent 'none'
+    if (data.length !== 4 * width * height) return { greenRatio: 0, mask, lighting: 'dark' };
     // shortcut: no background segmentation, assumes potato fills the frame; upgrade when real-image calibration shows background false positives
     const rx = (T.ROI_FRACTION * width) / 2, ry = (T.ROI_FRACTION * height) / 2;
     const roi: number[] = [], lab: Lab[] = [];
@@ -24,12 +26,14 @@ export class LocalGreenAnalyzer implements Analyzer {
     }
     if (roi.length === 0) return { greenRatio: 0, mask, lighting: 'dark' }; // empty frame: nothing to judge, and 'dark' keeps the verdict frozen
     const [medianL, medianA, medianB] = [0, 1, 2].map((k) => median(lab.map((p) => p[k])));
-    // b* is skipped when the median is already green: a yellow-green tuber has a high b*, and calling that tinted light would freeze its verdict
-    const lighting: Lighting = medianL < T.DARK_L ? 'dark' : medianA > T.TINT_A || (medianA >= T.A_ABS && Math.abs(medianB) > T.TINT_B) ? 'tinted' : 'ok';
+    // regime 2: the median itself is chlorophyll yellow-green, so most of the ROI is greening; any other median is skin-like (regime 1)
+    const clearlyGreen = medianA < T.GREEN_MEDIAN_A && medianB > 0;
+    // b* is skipped when the median is clearly green: a yellow-green tuber has a high b*, and calling that tinted light would freeze its verdict
+    const lighting: Lighting = medianL < T.DARK_L ? 'dark' : medianA > T.TINT_A || (!clearlyGreen && Math.abs(medianB) > T.TINT_B) ? 'tinted' : 'ok';
     let green = 0;
     lab.forEach(([L, a], k) => {
-      // medianA < A_ABS: when most of the ROI is green the median is green too, and the relative test alone would miss a fully green tuber
-      if (a < T.A_ABS && L > T.L_MIN && (medianA < T.A_ABS || a < medianA - T.A_REL)) { mask[roi[k]] = 1; green++; }
+      // regime 1 has no absolute gate: a warm cast lifts faint green above A_ABS, but it lifts the median with it
+      if (L > T.L_MIN && (clearlyGreen ? a < T.A_ABS : a < medianA - T.A_REL)) { mask[roi[k]] = 1; green++; }
     });
     return { greenRatio: green / roi.length, mask, lighting };
   }

@@ -1,4 +1,5 @@
 import { LocalGreenAnalyzer } from './localGreenAnalyzer';
+import { THRESHOLDS as T } from './thresholds';
 import { makeFrame } from './testFrames';
 
 const BROWN: [number, number, number] = [190, 150, 100];
@@ -20,9 +21,10 @@ type RGB = [number, number, number];
 const spot = (inside: RGB, outside: RGB) => makeFrame(64, 64, (x, y) => (x >= 28 && x < 36 && y >= 20 && y < 44) ? inside : outside);
 test('ירוק מלא: כל ה-ROI ירוק, היחס 1 (המכנה הוא ה-ROI ולא הפריים)', () => { expect(a.analyze(makeFrame(64, 64, () => GREEN)).greenRatio).toBe(1); });
 test('קליפה כמעט ניטרלית: כתם ירקרק מעט לא נספר, כתם ירוק בבירור נספר', () => {
-  const PALE: RGB = [160, 155, 130]; // a* -2.5, above A_ABS, so the relative rule decides
+  const PALE: RGB = [160, 155, 130]; // a* -2.5, a skin-like median, so the relative rule decides
   expect(a.analyze(spot([150, 152, 125], PALE)).greenRatio).toBe(0); // a* -5.55: below A_ABS but within A_REL of the median
-  expect(a.analyze(spot([135, 152, 122], PALE)).greenRatio).toBeGreaterThan(0.01); // a* -11.79
+  // fix wave: was [135, 152, 122] (a* -11.79), 9.29 below the median, which only the old A_REL 6 counted
+  expect(a.analyze(spot([120, 150, 115], PALE)).greenRatio).toBeGreaterThan(0.01); // a* -17.53, 15.03 below the median
 });
 test('ירוק כהה מתחת ל-L_MIN לא נספר', () => { expect(a.analyze(spot([20, 45, 10], BROWN)).greenRatio).toBe(0); }); // L* 15.7, a* -17.8
 test('חציונים מה-ROI בלבד: רקע שחור סביב תפוח חום לא נחשב תאורה חלשה', () => { expect(a.analyze(makeFrame(64, 64, (x, y) => (x >= 14 && x < 50 && y >= 14 && y < 50) ? BROWN : [5, 5, 5])).lighting).toBe('ok'); });
@@ -46,3 +48,43 @@ test('כהה וגם צבעוני: dark נבדק קודם', () => { expect(a.anal
 test('חציון a* מעט מעל A_ABS: הכלל היחסי עדיין חל', () => { expect(a.analyze(spot([145, 156, 145], [150, 156, 150])).greenRatio).toBe(0); }); // median a* -3.32; spot a* -6.08 is below A_ABS but within A_REL
 test('חציון a* מעט מעל A_ABS: בדיקת b* עדיין חלה (אור זהוב)', () => { expect(a.analyze(makeFrame(16, 16, () => [255, 218, 0])).lighting).toBe('tinted'); }); // a* -3.44, b* 87.66
 test('ירוק-צהבהב רווי (b* מעל TINT_B): עדיין ok כי החציון ירוק', () => { expect(a.analyze(makeFrame(64, 64, () => [160, 200, 50])).lighting).toBe('ok'); }); // a* -33.37, b* 65.70: keeps the median-green guard pinned now that GREEN's b* 41 is under TINT_B
+
+// Fix wave (final review): the two-regime rule under color casts. Light multipliers as in scripts/make-lighting-matrix.mjs; makeFrame's clamped array rounds and clips.
+const LIGHTS: Record<'daylight' | 'warm' | 'cool' | 'fluorescent', RGB> = { daylight: [1, 1, 1], warm: [1, 0.85, 0.6], cool: [0.8, 0.9, 1], fluorescent: [0.9, 1, 0.85] };
+const lit = (rgb: RGB, light: RGB) => rgb.map((v, i) => v * light[i]) as RGB;
+const FAINT: RGB = [165, 160, 105], YELLOW: RGB = [215, 185, 120], PALE_GREEN: RGB = [160, 165, 110]; // daylight a* -6.70, 2.10, -10.76
+const inSpot = (x: number, y: number) => x >= 26 && x < 37 && y >= 26 && y < 37; // 11 px square, 3% of the 64x64 frame, 5.9% of the ROI
+// seeded Gaussian (mulberry32, then Box-Muller), so the noisy skin is the same on every run
+const gaussian = (seed: number) => {
+  const next = () => { seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  return () => Math.sqrt(-2 * Math.log(1 - next())) * Math.cos(2 * Math.PI * next());
+};
+test.each(Object.keys(LIGHTS) as (keyof typeof LIGHTS)[])('כתם ירקרק חלש של 3% על חום, אור %s: local ו-ok', (light) => {
+  const r = a.analyze(makeFrame(64, 64, (x, y) => lit(inSpot(x, y) ? FAINT : BROWN, LIGHTS[light]))); // warm lifts the spot to a* 2.30, above A_ABS, which the old gate dropped
+  expect(r.lighting).toBe('ok'); expect(r.greenRatio).toBeGreaterThanOrEqual(T.NOISE_FLOOR); expect(r.greenRatio).toBeLessThan(T.WIDESPREAD);
+});
+test.each(['cool', 'fluorescent'] as const)('קליפה צהובה נקייה, אור %s: none ו-ok', (light) => {
+  const r = a.analyze(makeFrame(64, 64, () => lit(YELLOW, LIGHTS[light]))); // median a* -5.70 and -8.27: the old fallback below A_ABS counted every pixel
+  expect(r.lighting).toBe('ok'); expect(r.greenRatio).toBeLessThan(T.NOISE_FLOOR);
+});
+test.each(['daylight', 'cool', 'fluorescent'] as const)('קליפה חומה עם רעש גאוסי (סטיית תקן 6 לערוץ), אור %s: מתחת לרצפת הרעש', (light) => {
+  const g = gaussian(1); // the same skin under each light
+  const r = a.analyze(makeFrame(64, 64, () => lit(BROWN.map((v) => v + 6 * g()) as RGB, LIGHTS[light])));
+  expect(r.lighting).toBe('ok'); expect(r.greenRatio).toBeLessThan(T.NOISE_FLOOR);
+});
+// Known false positive, pinned. The brief expected none, but a white surface under this cast has the median of a pale-green tuber (a* -14.84, b* 15.52),
+// so it lands in regime 2 and every pixel counts. GREEN_MEDIAN_A below -15 would clear it, and a mostly pale-green side (a* -10.76) would then read none.
+test('לבן באור פלורסנט: נספר כולו (חיובי שגוי ידוע, בכיוון הבטוח)', () => { const r = a.analyze(makeFrame(64, 64, () => lit([250, 250, 250], LIGHTS.fluorescent))); expect(r.lighting).toBe('ok'); expect(r.greenRatio).toBe(1); });
+// Known false negative, pinned. The brief expected widespread. With exactly half the ROI pale green, the median sits midway (a* 7.82, between brown 17.55 and pale -1.90),
+// so the pale half is 9.72 below it, inside A_REL, and regime 1 finds nothing; daylight and cool behave the same at exactly half. Below half the median stays on the skin.
+test('חצי ירקרק בהיר על חום, אור חם: היחס 0 (שלילי שגוי ידוע); שליש מה-ROI: נרחבת', () => {
+  const half = a.analyze(makeFrame(64, 64, (x) => lit(x < 32 ? PALE_GREEN : BROWN, LIGHTS.warm)));
+  expect(half.lighting).toBe('ok'); expect(half.greenRatio).toBe(0);
+  expect(a.analyze(makeFrame(64, 64, (x) => lit(x < 26 ? PALE_GREEN : BROWN, LIGHTS.warm))).greenRatio).toBeGreaterThanOrEqual(T.WIDESPREAD); // 35% of the ROI: the median is the skin's
+});
+test('טורקיז (a* ירוק אבל b* שלילי, לא כלורופיל): הכלל היחסי, לא נספר', () => { const r = a.analyze(makeFrame(64, 64, () => [90, 170, 170])); expect(r.lighting).toBe('ok'); expect(r.greenRatio).toBe(0); }); // a* -24.45, b* -7.60: the old fallback counted all of it
+test('אור זהוב על חציון ירקרק מעט (a* בין GREEN_MEDIAN_A ל-A_ABS): בדיקת b* חלה, tinted', () => { expect(a.analyze(makeFrame(16, 16, () => [255, 225, 0])).lighting).toBe('tinted'); }); // a* -6.95, b* 88.92: the old gate skipped b* below A_ABS
+test('אורך data שגוי: dark, יחס 0 ו-mask ריק, ולא "לא זוהה ירוק" שקט', () => {
+  // light gray, so without the guard the frame would read ok and "no green"
+  for (const length of [4 * 16 - 4, 4 * 16 + 4]) expect(a.analyze({ width: 4, height: 4, data: new Uint8ClampedArray(length).fill(200) })).toEqual({ greenRatio: 0, mask: new Uint8Array(16), lighting: 'dark' });
+});

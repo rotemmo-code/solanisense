@@ -2,8 +2,9 @@ import { THRESHOLDS } from './thresholds';
 test('ספים נעולים (שינוי מכוון דורש עדכון snapshot)', () => { expect(THRESHOLDS).toMatchInlineSnapshot(`
   {
     "A_ABS": -4,
-    "A_REL": 6,
+    "A_REL": 11,
     "DARK_L": 25,
+    "GREEN_MEDIAN_A": -10,
     "L_MIN": 20,
     "NOISE_FLOOR": 0.01,
     "ROI_FRACTION": 0.8,
