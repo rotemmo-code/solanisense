@@ -5,6 +5,7 @@ test('העלאת תמונה עם כתם: הירקרקות מקומית', async (
   await page.locator('input[type=file]').setInputFiles('e2e/fixtures/green-spot.png');
   await expect(page.getByText('הירקרקות מקומית')).toBeVisible();
   await expect(page.locator('[aria-live="assertive"]')).toContainText('הירקרקות מקומית');
+  await expect(page.getByText('מקורות: BfR, CFS הונג קונג, Oregon State')).toBeVisible(); // fix wave: the advice names its sources
 });
 test('תמונה חומה: לא זוהה ירוק', async ({ page }) => {
   await page.goto('/');

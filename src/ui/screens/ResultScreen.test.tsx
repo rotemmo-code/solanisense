@@ -4,7 +4,7 @@ import { THRESHOLDS as T } from '../../core/analyzer/thresholds';
 import { platform } from '../../platform';
 import { DEFAULT_SETTINGS } from '../../platform/storage';
 import * as drawing from '../components/Overlay.drawing';
-import { CULTIVAR_WARNING, NOTHING_ANALYZED, TOO_FEW_FRAMES, VERDICT_TEXT } from '../strings';
+import { ADVICE_SOURCE, CULTIVAR_WARNING, NOTHING_ANALYZED, TOO_FEW_FRAMES, VERDICT_TEXT } from '../strings';
 import { ResultScreen } from './ResultScreen';
 
 // jsdom has no canvas: getContext answers null unless a test fakes a context
@@ -13,7 +13,7 @@ afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 const snap = { worst: 'local' as const, worstRatio: 0.042, worstFrame: { width: 2, height: 2, data: new Uint8ClampedArray(16) }, worstMask: new Uint8Array(4), okFrames: T.MIN_OK_FRAMES_FOR_NONE };
 const base = { source: 'live' as const, settings: { speech: false, haptics: false }, onAgain: () => {} }; // fix wave: the result needs the snapshot's source, and speaks per the settings
-test('מציג פסק דין, אחוז, הנחיה ואזהרת זנים', () => { render(<ResultScreen snapshot={snap} {...base} />); expect(screen.getByText('הירקרקות מקומית')).toBeInTheDocument(); expect(screen.getByText('4%')).toBeInTheDocument(); expect(screen.getByText(VERDICT_TEXT.local.advice)).toBeInTheDocument(); expect(screen.getByText(CULTIVAR_WARNING)).toBeInTheDocument(); });
+test('מציג פסק דין, אחוז, הנחיה ואזהרת זנים', () => { render(<ResultScreen snapshot={snap} {...base} />); expect(screen.getByText('הירקרקות מקומית')).toBeInTheDocument(); expect(screen.getByText('4%')).toBeInTheDocument(); expect(screen.getByText(VERDICT_TEXT.local.advice)).toBeInTheDocument(); expect(screen.getByText(CULTIVAR_WARNING)).toBeInTheDocument(); expect(screen.getByText(ADVICE_SOURCE)).toBeInTheDocument(); }); // fix wave: the advice names its sources
 test('סרוק עוד אחד', async () => { const f = vi.fn(); render(<ResultScreen snapshot={snap} {...base} onAgain={f} />); await userEvent.click(screen.getByRole('button', { name: 'סרוק עוד אחד' })); expect(f).toHaveBeenCalled(); });
 // Replaces the brief's third test (controller ruling 1): no frame means nothing was judged, so no verdict, not even "no green"
 test('בלי פריים (לא נסרק כלום): הודעה ניטרלית, בלי פסק דין, צורה, אחוז או תמונה', () => {
@@ -55,7 +55,7 @@ test('לא זוהה ירוק עם פריים: וי והנחיה, בלי אחוז
 test('סריקה חיה קצרה מדי בלי ירוק: הודעה ניטרלית, בלי פסק דין, צורה, הנחיה או תמונה', () => {
   render(<ResultScreen snapshot={{ ...snap, worst: 'none', worstRatio: 0, okFrames: T.MIN_OK_FRAMES_FOR_NONE - 1 }} {...base} />);
   expect(screen.getByText(TOO_FEW_FRAMES)).toBeInTheDocument(); expect(document.querySelector('[data-shape]')).toBeNull();
-  expect(screen.queryByText('לא זוהה ירוק')).toBeNull(); expect(screen.queryByText(VERDICT_TEXT.none.advice)).toBeNull(); expect(document.querySelector('canvas')).toBeNull();
+  expect(screen.queryByText('לא זוהה ירוק')).toBeNull(); expect(screen.queryByText(VERDICT_TEXT.none.advice)).toBeNull(); expect(screen.queryByText(ADVICE_SOURCE)).toBeNull(); expect(document.querySelector('canvas')).toBeNull();
   expect(screen.getByText(CULTIVAR_WARNING)).toBeInTheDocument(); expect(screen.getByRole('button', { name: 'סרוק עוד אחד' })).toBeInTheDocument();
 });
 test('מספיק פריימים, העלאה של תמונה אחת, או ירוק כבר בפריים הראשון: פסק דין', () => {

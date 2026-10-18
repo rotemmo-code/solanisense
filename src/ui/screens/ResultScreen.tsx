@@ -5,7 +5,7 @@ import { platform } from '../../platform';
 import type { Settings } from '../../platform/storage';
 import { drawOverlay } from '../components/Overlay.drawing';
 import { VerdictBanner } from '../components/VerdictBanner';
-import { CULTIVAR_WARNING, NOTHING_ANALYZED, RESULT_TEXT, TOO_FEW_FRAMES, VERDICT_TEXT } from '../strings';
+import { ADVICE_SOURCE, CULTIVAR_WARNING, NOTHING_ANALYZED, RESULT_TEXT, TOO_FEW_FRAMES, VERDICT_TEXT } from '../strings';
 
 export function ResultScreen({ snapshot, source, settings, onAgain }: { snapshot: ScanSnapshot; source: 'live' | 'upload'; settings: Settings; onAgain: () => void }) {
   const { worst, worstFrame: frame, worstMask: mask } = snapshot;
@@ -40,6 +40,7 @@ export function ResultScreen({ snapshot, source, settings, onAgain }: { snapshot
           <canvas ref={ref} width={frame.width} height={frame.height} role="img" aria-label={label} className="max-h-[50dvh] w-full object-contain" />
           {percent && <p className="text-2xl"><span className="font-bold">{percent}</span> {RESULT_TEXT.percent}</p>}
           <p className="text-2xl">{VERDICT_TEXT[worst].advice}</p>
+          <p className="text-lg">{ADVICE_SOURCE}</p>
         </>
       ) : (
         <p className="text-2xl font-bold">{neutral}</p>

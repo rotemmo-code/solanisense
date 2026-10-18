@@ -20,6 +20,8 @@ export const NOTHING_ANALYZED = 'לא נסרק דבר. נסה שוב באור ט
 export const TOO_FEW_FRAMES = 'הסריקה הייתה קצרה מדי. סרוק לפחות שלוש שניות וסובב את תפוח האדמה לכל הצדדים.';
 // percent follows a separate "4%" element; image is the start of the picture's screen-reader label
 export const RESULT_TEXT = { again: 'סרוק עוד אחד', percent: 'מהשטח בתמונה ירוק', image: 'התמונה שנסרקה' };
+// the sources of the three result advices (docs/research, section 4); plural, as the info screen labels a list of sources
+export const ADVICE_SOURCE = 'מקורות: BfR, CFS הונג קונג, Oregon State';
 export const INFO_TEXT = {
   title: 'מידע',
   source: 'מקור:',
