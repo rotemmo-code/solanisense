@@ -152,3 +152,11 @@ test('הלחיצה על "העלה תמונה" משחררת הקראה ב-iOS, ר
   first.unmount(); speak.mockClear(); renderScan({ speech: false, haptics: true });
   await userEvent.upload(screen.getByLabelText('העלה תמונה'), file); expect(speak).not.toHaveBeenCalled();
 });
+// Re-review fix: an upload during a live scan merges into the live frames, so it must not take the upload exemption from the minimum-frames rule
+test('העלאה באמצע סריקה חיה: המקור נשאר "live", כך ששלושה פריימים ותמונה חשוכה לא נותנים "לא זוהה ירוק"', async () => {
+  fakeCamera(); const { onDone } = renderScan(); await startTap();
+  frame = clean; await tick(300 * 3); // three well-lit frames without green
+  vi.spyOn(cameraModule, 'frameFromFile').mockResolvedValue(dark);
+  await userEvent.upload(screen.getByLabelText('העלה תמונה'), new File(['x'], 'a.jpg', { type: 'image/jpeg' }));
+  expect(onDone).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ worst: 'none', worstFrame: clean, okFrames: 3 }), 'live'); // ResultScreen then shows TOO_FEW_FRAMES
+});

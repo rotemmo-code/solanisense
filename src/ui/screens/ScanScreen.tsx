@@ -83,7 +83,8 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
       setUnsupported(true);
       return;
     }
-    finish('upload');
+    // during a live scan the image merges into the live frames, so the result stays live and keeps the minimum-frames guard for 'none'
+    finish(phase === 'scanning' ? 'live' : 'upload');
   };
 
   return (
