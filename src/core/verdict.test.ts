@@ -28,3 +28,12 @@ test('snapshot שכבר נמסר לא משתנה אחרי update או reset', ()
   s.update(ok(0.5), frame()); const second = s.snapshot; s.reset();
   expect(first.worst).toBe('local'); expect(first.worstRatio).toBe(0.05); expect(second.worst).toBe('widespread');
 });
+// Fix wave: okFrames, the evidence a live "none" waits for
+test('okFrames סופר כל פריים מואר, גם בלי עלייה, ולא פריים חשוך או צבעוני; reset מאפס', () => {
+  const s = new ScanState(); const f = frame();
+  s.update(ok(0), f); s.update(ok(0), frame()); s.update({ ...ok(0.5), lighting: 'dark' }, frame()); s.update({ ...ok(0.5), lighting: 'tinted' }, frame());
+  const handed = s.snapshot; s.update(ok(0.05), frame());
+  expect(handed.okFrames).toBe(2); expect(handed.worstFrame).toBe(f); // the second frame only counted; the snapshot handed out keeps its count
+  expect(s.snapshot.okFrames).toBe(3); expect(s.snapshot.worst).toBe('local');
+  s.reset(); expect(s.snapshot.okFrames).toBe(0);
+});

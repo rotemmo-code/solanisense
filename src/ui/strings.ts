@@ -17,6 +17,7 @@ export const SCAN_TEXT = {
 };
 export const CULTIVAR_WARNING = 'על קליפה אדומה או חומה מחוספסת הירוק עלול להיות מוסתר. טעם מר או נבטים הם סימני אזהרה גם בלי ירוק.';
 export const NOTHING_ANALYZED = 'לא נסרק דבר. נסה שוב באור טוב יותר, ומלא את המסגרת בתפוח האדמה.';
+export const TOO_FEW_FRAMES = 'הסריקה הייתה קצרה מדי. סרוק לפחות שלוש שניות וסובב את תפוח האדמה לכל הצדדים.';
 // percent follows a separate "4%" element; image is the start of the picture's screen-reader label
 export const RESULT_TEXT = { again: 'סרוק עוד אחד', percent: 'מהשטח בתמונה ירוק', image: 'התמונה שנסרקה' };
 export const INFO_TEXT = {

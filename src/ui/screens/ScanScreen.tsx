@@ -1,5 +1,6 @@
 import { type ChangeEvent, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { LocalGreenAnalyzer } from '../../core/analyzer/localGreenAnalyzer';
+import { THRESHOLDS as T } from '../../core/analyzer/thresholds';
 import type { Lighting, Verdict } from '../../core/analyzer/types';
 import { ScanState, type ScanSnapshot } from '../../core/verdict';
 import { platform } from '../../platform';
@@ -13,7 +14,7 @@ const analyzer = new LocalGreenAnalyzer();
 const FRAME_WIDTH = 256; // spec 4.1
 const BUTTON = 'flex min-h-14 w-full items-center justify-center rounded-xl px-6 text-2xl font-bold';
 
-export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (snap: ScanSnapshot) => void }) {
+export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (snap: ScanSnapshot, source: 'live' | 'upload') => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [scan] = useState(() => new ScanState());
   // the camera waits for a start tap: that tap is the user gesture iOS needs before it speaks and Android before it vibrates
@@ -32,7 +33,9 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
       if (settings.speech) platform.speech.speak(VERDICT_TEXT[worst].speech);
       if (settings.haptics) platform.haptics.vibrate(worst);
     }
-    setVerdict(scan.snapshot.worstFrame ? scan.snapshot.worst : null); // the scan keeps its first well-lit frame, so a frame means one was judged
+    const s = scan.snapshot;
+    // a frame means a well-lit one was judged; 'none' also waits for a few seconds of them, since each frame sees one side, while green shows at once
+    setVerdict(s.worstFrame && (s.worst !== 'none' || s.okFrames >= T.MIN_OK_FRAMES_FOR_NONE) ? s.worst : null);
     setLighting(result.lighting);
     setMarks(result.lighting === 'ok' ? { mask: result.mask, width: frame.width, height: frame.height } : null); // marks from a badly lit frame would mislead
   });
@@ -65,7 +68,7 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
     setVerdict(null); setLighting('ok'); setMarks(null);
     setPhase('scanning');
   };
-  const finish = () => { setPhase('idle'); onDone(scan.snapshot); }; // leaving 'scanning' stops the camera and the loop
+  const finish = (source: 'live' | 'upload') => { setPhase('idle'); onDone(scan.snapshot, source); }; // leaving 'scanning' stops the camera and the loop
 
   const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -79,7 +82,7 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
       setUnsupported(true);
       return;
     }
-    finish();
+    finish('upload');
   };
 
   return (
@@ -101,7 +104,7 @@ export function ScanScreen({ settings, onDone }: { settings: Settings; onDone: (
         {phase === 'noCamera' && <p role="alert" className="text-2xl">{SCAN_TEXT.noCamera}</p>}
       </div>
       <div className="flex flex-col gap-3 p-4">
-        {phase === 'scanning' && <button type="button" onClick={finish} className={`${BUTTON} bg-white text-black`}>{SCAN_TEXT.done}</button>}
+        {phase === 'scanning' && <button type="button" onClick={() => finish('live')} className={`${BUTTON} bg-white text-black`}>{SCAN_TEXT.done}</button>}
         <label className={`${BUTTON} cursor-pointer border-2 border-white focus-within:outline-4 focus-within:outline-offset-2 focus-within:outline-white`}>
           {SCAN_TEXT.upload}
           <input type="file" accept="image/*" aria-label={SCAN_TEXT.upload} onChange={onFile} className="sr-only" />

@@ -10,4 +10,5 @@ export const THRESHOLDS = {
   TINT_B: 60, // |median b*| above this: lighting tinted, unless the median is clearly green (regime 2); high on purpose, yellow skin reaches b* 45
   TINT_A: 45, // median a* above this: lighting tinted; high on purpose, red skin reaches a* 35
   ROI_FRACTION: 0.8, // ROI ellipse semi-axes as a fraction of half the frame width and height
+  MIN_OK_FRAMES_FOR_NONE: 10, // a live scan shows 'none' only after this many well-lit frames, about 3 s at 300 ms; one frame sees one side
 } as const;

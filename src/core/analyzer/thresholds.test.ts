@@ -6,6 +6,7 @@ test('ספים נעולים (שינוי מכוון דורש עדכון snapshot)
     "DARK_L": 25,
     "GREEN_MEDIAN_A": -10,
     "L_MIN": 20,
+    "MIN_OK_FRAMES_FOR_NONE": 10,
     "NOISE_FLOOR": 0.01,
     "ROI_FRACTION": 0.8,
     "TINT_A": 45,

@@ -1,12 +1,13 @@
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { makeFrame } from '../../core/analyzer/testFrames';
+import { THRESHOLDS as T } from '../../core/analyzer/thresholds';
 import type { Frame } from '../../core/analyzer/types';
 import { platform } from '../../platform';
 import * as cameraModule from '../../platform/camera';
 import { DEFAULT_SETTINGS, type Settings } from '../../platform/storage';
 import * as drawing from '../components/Overlay.drawing';
-import { VERDICT_TEXT } from '../strings';
+import { SCAN_HINT, VERDICT_TEXT } from '../strings';
 import { ScanScreen } from './ScanScreen';
 
 let frame: Frame | null = null;
@@ -53,7 +54,7 @@ test('פסק דין חי כל 300ms; הקראה ורטט רק כשהרמה עו�
   const cam = fakeCamera(); const { speak, vibrate } = alerts(); renderScan(); await startTap(); speak.mockClear();
   expect(document.querySelector('[aria-live="assertive"]')).toBeInTheDocument(); // mounted from the tap on, so screen readers announce the first verdict
   await tick(); expect(document.querySelector('[data-shape]')).toBeNull(); // no picture yet: no verdict at all, not even "no green"
-  frame = clean; await tick();
+  frame = clean; await tick(300 * T.MIN_OK_FRAMES_FOR_NONE); // fix wave: 'none' waits for MIN_OK_FRAMES_FOR_NONE well-lit frames
   expect(cam.grab).toHaveBeenLastCalledWith(document.querySelector('video'), 256);
   expect(screen.getByText('לא זוהה ירוק')).toBeInTheDocument(); expect(speak).not.toHaveBeenCalled(); expect(vibrate).not.toHaveBeenCalled();
   frame = local; await tick(); await tick();
@@ -100,7 +101,7 @@ test('סיימתי: onDone עם הפריים החמור ביותר, והמצלמ
   const cam = fakeCamera(); const { onDone } = renderScan(); await startTap();
   frame = local; await tick(); frame = clean; await tick();
   await userEvent.click(screen.getByRole('button', { name: 'סיימתי' }));
-  expect(onDone).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ worst: 'local', worstFrame: local }));
+  expect(onDone).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ worst: 'local', worstFrame: local }), 'live');
   expect(cam.stop).toHaveBeenCalled(); await tick(900); expect(cam.grab).toHaveBeenCalledTimes(2);
 });
 test('סריקה חדשה באותו מסך מתחילה נקייה: בלי פסק דין, סימון או הודעת תאורה ישנים עד פריים חדש', async () => {
@@ -110,8 +111,8 @@ test('סריקה חדשה באותו מסך מתחילה נקייה: בלי פס
   expect(document.querySelector('[data-shape]')).toBeNull(); expect(cam.paint).toHaveBeenCalledTimes(1); // the first scan's verdict and marks are gone
   frame = dark; await tick(); await done(); frame = null; await startTap(); await tick();
   expect(screen.queryByText(/התאורה/)).toBeNull(); // nor its lighting message
-  frame = clean; await tick(); expect(screen.getByText('לא זוהה ירוק')).toBeInTheDocument(); // not the first scan's "local"
-  await done(); expect(onDone).toHaveBeenLastCalledWith(expect.objectContaining({ worst: 'none', worstFrame: clean }));
+  frame = clean; await tick(300 * T.MIN_OK_FRAMES_FOR_NONE); expect(screen.getByText('לא זוהה ירוק')).toBeInTheDocument(); // not the first scan's "local"
+  await done(); expect(onDone).toHaveBeenLastCalledWith(expect.objectContaining({ worst: 'none', worstFrame: clean }), 'live');
 });
 test('יציאה מהמסך עוצרת את המצלמה ומפסיקה להאזין לנראות הטאב', async () => {
   const cam = fakeCamera(); const { unmount } = renderScan(); await startTap();
@@ -123,14 +124,22 @@ test('העלאה בלי לחיצת התחלה: ניתוח ו-onDone מיד; תמ
   const file = new File(['x'], 'a.jpg', { type: 'image/jpeg' });
   const first = renderScan();
   await userEvent.upload(screen.getByLabelText('העלה תמונה'), file);
-  expect(fromFile).toHaveBeenCalledWith(file, 256); expect(first.onDone).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ worst: 'local', worstFrame: local }));
+  expect(fromFile).toHaveBeenCalledWith(file, 256); expect(first.onDone).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ worst: 'local', worstFrame: local }), 'upload');
   first.unmount(); const second = renderScan();
   await userEvent.upload(screen.getByLabelText('העלה תמונה'), file);
-  expect(second.onDone).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ worst: 'none', worstFrame: null }));
+  expect(second.onDone).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ worst: 'none', worstFrame: null }), 'upload');
 });
 test('אותו קובץ שוב אחרי "הקובץ לא נתמך": נבדק שוב ולא נבלע', async () => {
   const fromFile = vi.spyOn(cameraModule, 'frameFromFile').mockRejectedValue(new Error('unsupported'));
   const file = new File(['x'], 'a.heic', { type: 'image/heic' }); renderScan();
   await userEvent.upload(screen.getByLabelText('העלה תמונה'), file); await userEvent.upload(screen.getByLabelText('העלה תמונה'), file);
   expect(fromFile).toHaveBeenCalledTimes(2); expect(screen.getByText('הקובץ לא נתמך')).toBeInTheDocument();
+});
+// Fix wave: the live banner says "no green" only after MIN_OK_FRAMES_FOR_NONE well-lit frames; until then the hint stands alone
+test('"לא זוהה ירוק" רק אחרי MIN_OK_FRAMES_FOR_NONE פריימים מוארים; עד אז רק ההנחיה, ופריים חשוך לא נספר', async () => {
+  fakeCamera(); renderScan(); await startTap();
+  frame = clean; await tick(300 * (T.MIN_OK_FRAMES_FOR_NONE - 1));
+  expect(document.querySelector('[data-shape]')).toBeNull(); expect(screen.queryByText('לא זוהה ירוק')).toBeNull(); expect(screen.getByText(SCAN_HINT)).toBeInTheDocument();
+  frame = dark; await tick(); expect(document.querySelector('[data-shape]')).toBeNull(); // a dark frame is no evidence
+  frame = clean; await tick(); expect(document.querySelector('[data-shape="check"]')).not.toBeNull(); expect(screen.getByText('לא זוהה ירוק')).toBeInTheDocument();
 });
