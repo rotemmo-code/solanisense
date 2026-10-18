@@ -30,6 +30,14 @@ The app never says "safe" and never shows a "solanine level". The disclaimer, as
 
 > The app detects green only, not sprouts and not rot. The result is valid only for a potato that fills the frame. The thresholds are engineering values, not medically validated. Scan in natural or white light, because colored light can mislead. When no green is detected, that does not mean there is no toxin. When in doubt: do not eat.
 
+## Screen mockups (illustrative)
+
+The three mockups below illustrate the planned design system; they are not screenshots of the app. The current UI is still unstyled (see status above). Source: `docs/design/mockups/mockups.html`.
+
+| Live scan | Result | Info |
+|---|---|---|
+| ![Scan screen mockup: "no green detected" verdict with a check-in-circle shape, dashed ellipse guide over the video, a "Done" button](docs/design/mockups/01-scan.png) | ![Result screen mockup: "local greening" with a triangle shape, the green area outlined with white stripes, advice with sources, a "scan another" button](docs/design/mockups/02-result.png) | ![Info screen mockup: speech and vibration switches, "how to clean" illustration, an info card with its source](docs/design/mockups/03-info.png) |
+
 ## The screens
 
 **Scan.** The main screen. On entry there is one button, "Start scan", and the camera opens only after the tap: the rear one, and if there is none, another one. At the top of the screen is the verdict, which appears only after a properly lit frame has been checked, and below it the hint "Fill the frame with the potato and rotate it slowly to all sides". "No green detected" waits for ten well-lit frames, about three seconds, because each frame sees one side. Until then only the hint appears. Green is shown at once. The video is shown in full, and the marks are drawn over it. The ellipse the analyzer checks is also drawn on the video, as a white dashed line with a black halo, already before the first frame, so it is clear what to fill with the potato. When the light is weak or colored a message appears, and the verdict freezes until the light improves. "Done" goes to the result screen. "Upload image" analyzes one image and goes straight to the result. Without camera permission the screen explains how to grant it, and leaves only the upload. On leaving the screen, on "Done" and in a hidden tab, the camera turns off.
