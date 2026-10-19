@@ -14,6 +14,8 @@
 4. סקירת אבטחה לכל קוד לפני שמדווחים שהוא גמור.
 5. commit אחרי כל שלב.
 6. אל תגיד לי מה שאני רוצה לשמוע. תסתכל אובייקטיבית, תסתור אותי כשצריך, ולך עם הדעה החזקה שלך.
+7. כל פיתוח בענף משלו (`feat/…`, `fix/…`, `chore/…`), לעולם לא ישירות על `main`. כל שינוי נכנס ל-main רק דרך Pull Request. `main` מוגן ב-GitHub.
+8. git מעדכן את Obsidian בעצמו: hooks ב-`scripts/githooks` רושמים ליומן הפתק כל commit, push ו-merge. הפעלה ב-clone חדש: `git config core.hooksPath scripts/githooks`.
 
 ## כללי קוד
 - `src/core/` הוא TypeScript טהור: בלי DOM, בלי React, בלי Web API. בדיקות יחידה חובה.

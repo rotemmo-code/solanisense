@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Runs after `git pull` / `git merge`, i.e. when a merged PR lands in this clone.
+"$(dirname "$0")/obsidian-journal" "merge into $(git rev-parse --abbrev-ref HEAD): $(git log -1 --format='%h %s')"
