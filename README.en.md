@@ -129,6 +129,16 @@ The service worker, and with it offline use, is active only in the build (`npm r
 
 Do not run `npm run dev -- --host` on an unknown network: it exposes the dev server to the whole network ([security review](docs/security-review.md), section 4).
 
+### Obsidian link (git hook)
+
+After every commit, a local hook appends a line to the journal of the project note in Obsidian (`SolaniSense/SolaniSense.md` in the vault). The script in `scripts/githooks/post-commit` reads the vault path from Obsidian's own settings, so nothing is hard-coded. Enable once per clone:
+
+```bash
+git config core.hooksPath scripts/githooks
+```
+
+If Obsidian is not installed or the note does not exist, the hook does nothing.
+
 ## Tests
 
 ```bash

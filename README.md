@@ -127,6 +127,16 @@ npm run preview    # מגיש את dist ב-http://localhost:4173
 
 לא להריץ `npm run dev -- --host` ברשת לא מוכרת: זה חושף את שרת הפיתוח לכל הרשת ([סקירת האבטחה](docs/security-review.md), סעיף 4).
 
+### חיבור ל-Obsidian (hook של git)
+
+אחרי כל commit, hook מקומי מוסיף שורה ליומן בפתק הפרויקט ב-Obsidian (`SolaniSense/SolaniSense.md` ב-vault). הסקריפט ב-`scripts/githooks/post-commit` קורא את נתיב ה-vault מההגדרות של Obsidian, ולכן אין בו נתיבים קבועים. הפעלה חד-פעמית בכל clone:
+
+```bash
+git config core.hooksPath scripts/githooks
+```
+
+אם Obsidian לא מותקן או שהפתק לא קיים, ה-hook פשוט לא עושה כלום.
+
 ## בדיקות
 
 ```bash
