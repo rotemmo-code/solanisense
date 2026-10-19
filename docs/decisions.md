@@ -49,3 +49,4 @@
 | # | החלטה | סיבה | מחיר אם שגוי |
 |---|---|---|---|
 | 26 | hook של git (`post-commit`, מגורסה ב-`scripts/githooks`, מופעל עם `core.hooksPath`) מוסיף שורה ליומן בפתק ה-Obsidian אחרי כל commit; נתיב ה-vault נקרא מהגדרות Obsidian | המשתמש ביקש חיבור אוטומטי בין git ל-Obsidian; כתיבה לקובץ בדיסק עובדת גם כש-Obsidian סגור, בלי תלות ב-REST API | ב-clone חדש צריך להפעיל פעם אחת; commit שמתוקן ב-amend מופיע פעמיים ביומן |
+| 27 | כל פיתוח בענף + PR, `main` מוגן ב-GitHub (דרישת המשתמש). hooks של git רושמים ליומן ה-Obsidian גם push ו-merge, לא רק commit | המשתמש ביקש ש-GitHub יעדכן את Obsidian בכל מהלך עדכון; GitHub עצמו לא יכול להגיע ל-vault המקומי, לכן הרישום קורה בצד המקומי ברגע הדחיפה והמשיכה | PR שמוזג ב-GitHub נרשם רק כשעושים pull במחשב |

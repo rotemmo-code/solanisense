@@ -129,13 +129,19 @@ npm run preview    # מגיש את dist ב-http://localhost:4173
 
 ### חיבור ל-Obsidian (hook של git)
 
-אחרי כל commit, hook מקומי מוסיף שורה ליומן בפתק הפרויקט ב-Obsidian (`SolaniSense/SolaniSense.md` ב-vault). הסקריפט ב-`scripts/githooks/post-commit` קורא את נתיב ה-vault מההגדרות של Obsidian, ולכן אין בו נתיבים קבועים. הפעלה חד-פעמית בכל clone:
+hooks מקומיים מוסיפים שורה ליומן בפתק הפרויקט ב-Obsidian (`SolaniSense/SolaniSense.md` ב-vault) אחרי כל commit, לפני כל push ל-GitHub, ואחרי כל merge או pull (כלומר כשה-PR שמוזג ב-GitHub מגיע ל-clone). הסקריפטים ב-`scripts/githooks` קוראים את נתיב ה-vault מההגדרות של Obsidian, ולכן אין בהם נתיבים קבועים. הפעלה חד-פעמית בכל clone:
 
 ```bash
 git config core.hooksPath scripts/githooks
 ```
 
 אם Obsidian לא מותקן או שהפתק לא קיים, ה-hook פשוט לא עושה כלום.
+
+## תהליך עבודה ב-git
+
+- כל פיתוח בענף משלו (`feat/…`, `fix/…`, `chore/…`). אין commits ישירים על `main`.
+- כל שינוי נכנס ל-`main` דרך Pull Request בלבד. `main` מוגן ב-GitHub.
+- אחרי merge של PR: `git checkout main && git pull`, וה-hook רושם את ה-merge ביומן ה-Obsidian.
 
 ## בדיקות
 

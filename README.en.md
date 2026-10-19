@@ -131,13 +131,19 @@ Do not run `npm run dev -- --host` on an unknown network: it exposes the dev ser
 
 ### Obsidian link (git hook)
 
-After every commit, a local hook appends a line to the journal of the project note in Obsidian (`SolaniSense/SolaniSense.md` in the vault). The script in `scripts/githooks/post-commit` reads the vault path from Obsidian's own settings, so nothing is hard-coded. Enable once per clone:
+Local hooks append a line to the journal of the project note in Obsidian (`SolaniSense/SolaniSense.md` in the vault) after every commit, before every push to GitHub, and after every merge or pull (that is, when a PR merged on GitHub lands in this clone). The scripts in `scripts/githooks` read the vault path from Obsidian's own settings, so nothing is hard-coded. Enable once per clone:
 
 ```bash
 git config core.hooksPath scripts/githooks
 ```
 
 If Obsidian is not installed or the note does not exist, the hook does nothing.
+
+## Git workflow
+
+- Every change on its own branch (`feat/…`, `fix/…`, `chore/…`). No direct commits on `main`.
+- Changes reach `main` only through a Pull Request. `main` is protected on GitHub.
+- After a PR merges: `git checkout main && git pull`, and the hook records the merge in the Obsidian journal.
 
 ## Tests
 

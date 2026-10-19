@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Logs every push to GitHub. Never blocks the push.
+"$(dirname "$0")/obsidian-journal" "push $(git rev-parse --abbrev-ref HEAD) → $1 ($(git log -1 --format='%h'))"
+exit 0
